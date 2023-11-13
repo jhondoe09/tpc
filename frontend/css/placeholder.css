@@ -1,0 +1,16 @@
+
+    .attachment-container {
+        display: flex;
+        white-space: nowrap;
+    }
+
+    .attachment {
+        padding: 2px;
+        text-align: center;
+        max-width: 100px;
+    }
+
+    .attachment img {
+        max-width: 15%;
+        height: auto;
+    }

@@ -1,0 +1,31 @@
+.grid-container {
+  display: grid;
+  border-top: 1px solid black;
+  border-left: 1px solid black;
+  padding: 1px;
+}
+.grid-container > div .col{
+  border-bottom: 1px solid black;
+  border-right: 1px solid black;
+}
+
+/* 
+.grid-container {
+    display: grid;
+    grid-template-columns: auto auto auto auto;
+    padding: 1px;
+  }
+  
+  
+  .grid-container > div {
+    border-style: solid;
+    border-width: 1px;
+    border-right: none;
+    padding: 1px;
+  }
+  .grid-container .date_data {
+    border-style: solid;
+    border-width: 1px;
+    border-right: none;
+    padding: 1px;
+  } */

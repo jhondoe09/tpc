@@ -1,0 +1,95 @@
+.grid-container {
+  display: grid;
+  grid-template-columns: auto auto auto auto auto auto;
+  border-top: 1px solid black;
+  border-left: 1px solid black;
+  padding: 1px;
+}
+.grid-container > div{
+  border-bottom: 1px solid black;
+  border-right: 1px solid black;
+}
+.wrapper > div{
+  border: 1px solid black;
+  grid-template-columns: auto auto auto auto auto auto;
+  margin: auto;  
+  padding: 1px;
+  text-align: center;
+}
+
+
+/* 
+
+.grid-container {
+  display: grid;
+  grid-template-columns: auto auto auto auto auto auto;
+  padding: 1px;
+}
+.grid-container > div {
+  border-style: solid;
+  border-width: 1px;
+  border-right: none;
+  border-bottom: none;
+  padding: 1px;
+}
+.grid-container .last_coc{
+  border-style: solid;
+  border-width: 1px;
+  border-right: none;
+  padding: 1px;
+}
+.grid-container .last_coc_data{
+  border-style: solid;
+  border-width: 1px;
+  border-right: none;
+  padding: 1px;
+}
+.grid-container .last_ids{
+  border-style: solid;
+  border-width: 1px;
+  border-right: none;
+  padding: 1px;
+}
+.grid-container .last_ids_data{
+  border-style: solid;
+  border-width: 1px;
+  padding: 1px;
+}
+.grid-container .mdl_tray_data{
+  border-style: solid;
+  border-width: 1px;
+  border-bottom: none;
+  padding: 1px;
+}
+.grid-container .orig_data{
+  border-style: solid;
+  border-width: 1px;
+  border-bottom: none;
+  padding: 1px;
+}
+.grid-container .std_data{
+  border-style: solid;
+  border-width: 1px;
+  border-bottom: none;
+  padding: 1px;
+}
+.grid-container .k_data{
+  border-style: solid;
+  border-width: 1px;
+  border-bottom: none;
+  padding: 1px;
+}
+.grid-container .clip_data{
+  border-style: solid;
+  border-width: 1px;
+  border-bottom: none;
+  padding: 1px;
+}
+.grid-container .last_cover_data{
+  border-style: solid;
+  border-width: 1px;
+  border-bottom: none	;
+  padding: 1px;
+}
+
+  */
