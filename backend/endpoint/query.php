@@ -54,21 +54,53 @@ function handleOpenSubProcess($postData)
 {
     require '../config/conn.php';
     $tpc_dbs_connection = mysqli_connect($development['server'], $development['username'], $development['password'], $tpc_prod_dbs);
+    $tpc_connection = mysqli_connect($development['server'], $development['username'], $development['password'], $tpc_dbs);
     $main_prd_id = $postData['main_prd_id'];
+    $assignment_id = $postData['assignment_id'];
+    $SubPid = $postData['SubPid'];
     $query = "UPDATE `tpc_main_tbl` SET `tpc_sub_status`= 'Open' WHERE `main_prd_id` = '$main_prd_id'";
     $result = mysqli_query($tpc_dbs_connection, $query);
     if (!$result) {
         $response = array(
             'success' => false,
-            'message' => 'ERROR!' . mysqli_error($tpc_dbs_connection)
+            'message' => 'Unable to update data due to an error => ' . mysqli_error($tpc_dbs_connection)
         );
     } else {
-        $response = array(
-            'success' => true,
-            'message' => 'Sub-Process is now Opened!'
-        );
+        $select = "SELECT * FROM `form_item_conditions_tbl` WHERE `assignment_id` = '$assignment_id' AND `SubPid` = '$SubPid' AND `condition_status` = 'Inactive'";
+        $result1 = mysqli_query($tpc_connection, $select);
+        if (!$result1) {
+            $response = array(
+                'success' => false,
+                'message' => 'Unable to fetch any data due to an error => ' . mysqli_error($tpc_connection)
+            );
+        } else {
+            if (mysqli_num_rows($result1) > 0) {
+                while ($row = mysqli_fetch_assoc($result1)) {
+                    $sql = "UPDATE `form_item_conditions_tbl` SET `condition_status`= 'Active' WHERE `assignment_id` = '{$row['assignment_id']}' AND `SubPid` = '{$row['SubPid']}'";
+                    $res = mysqli_query($tpc_connection, $sql);
+                    if (!$res) {
+                        $response = array(
+                            'success' => false,
+                            'message' => 'An error occured while updating data, please contact IT/SD for more information error=>' . mysqli_error($tpc_connection)
+                        );
+                    } else {
+                        $response = array(
+                            'success' => true,
+                            'message' => 'Sub process and conditions has been updated successfully!'
+                        );
+                    }
+                }
+            } else {
+                $response = array(
+                    'success' => true,
+                    'message' => 'The subprocess has been initiated; however, the associated item conditions are not detected or available.'
+                );
+            }
+        }
+        return $response;
+        $tpc_connection->close();
+        $tpc_dbs_connection->close();
     }
-    return $response;
 }
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['closeSubProcessBtn'])) {

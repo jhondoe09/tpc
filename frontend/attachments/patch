@@ -1,0 +1,11 @@
+02/08/2024
+:-Implemented additional validation protocols pertaining to the status of sub processes,
+\*including but not limited to the states of {"Open," "To Be Determined (TBD)," and "Done"}
+02/07/2024
+:-Resolved the camera facing orientation issue.
+\*(The camera's current configuration depicts the surroundings rather than the user's perspective.
+\*Specifically, this pertains to the utilization of the rear camera on a smartphone.)
+02/05/2024
+:- Implemented the newly requested feature as per Mr. Reggie's specifications, enabling users to reference conditions from completed processes.
+:- Rectified the NG Tally functionality to ensure accurate data validation.
+:- Implemented the new feature to accommodate special instructions as requested.

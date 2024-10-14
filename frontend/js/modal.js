@@ -27,18 +27,20 @@ qrSubmitBtn.addEventListener('click', (event) => {
     const assignment_id = myStringArray[5];
     // console.log(`item_code${item_code},parts_number ${parts_number}, lot_number${lot_number}, date_issued${date_issued},revision_number ${revision_number}`);
     var sectionId = document.getElementById('sectionId').value;
-    const data = new FormData();
-    data.append('item_code', item_code);
-    data.append('parts_number', parts_number);
-    data.append('lot_number', lot_number);
-    data.append('date_issued', date_issued);
-    data.append('revision_number', revision_number);
-    data.append('section_id', sectionId);
-    data.append('assignment_id', assignment_id);
-    data.append('QrSubmitBtn', 'true');
-    fetch(fetchURL1, {
-        method: 'POST',
-        body: data
+    const params = {
+        item_code: item_code,
+        parts_number: parts_number,
+        lot_number: lot_number,
+        date_issued: date_issued,
+        revision_number: revision_number,
+        section_id: sectionId,
+        assignment_id: assignment_id,
+        QrSubmitBtn: 'true'
+    };
+    const url = new URL(fetchURL1);
+    Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
+    fetch(url.toString(), {
+        method: 'GET'
     })
         .then(response => response.json())
         .then(data => {

@@ -33,8 +33,9 @@
   </div>
 </div>
 <div class="col-md-6 mx-auto">
-  <p class="text-break" style="text-align: center;">Remarks: WITH DOUBLE-SIDE POLISHING/LAPPING</p>
+  <p class="text-break" style="text-align: center;">Remarks: WITH DOUBLE-SIDE CCD/LAPPING</p>
 </div>
+
 <script>
   // let section_description = localStorage.getItem('sectionDescription');
   // let lot_number = localStorage.getItem('lotNo');

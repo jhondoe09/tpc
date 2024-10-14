@@ -1,114 +1,109 @@
 <link href="./frontend/css/cci_grid.css" rel="stylesheet" crossorigin="anonymous">
 
-<div class="row align-items-start overflow-auto">
-  <table class="table table-responsive">
-    <div class="grid-container" style="text-align: left;">
-      <!-- Order P/N -->
-      <div><strong>Order P/N</strong></div>
-      <div id="orderPn">-</div>
-      <!-- Order Quantity -->
-      <div><strong>Order Quantity</strong></div>
-      <div id="orderQuantity">-</div>
-      <!-- Model of Tray -->
-      <div><strong>Model of Tray</strong></div>
-      <div class="mdl_tray_data" id="modelOfTray">-</div>
-      <!-- Part Number -->
-      <div><strong>Part Number</strong></div>
-      <div id="partsNumber">-</div>
-      <!-- Quantity of Pack -->
-      <div><strong>Quantity of Pack</strong></div>
-      <div id="quantityOfPack">-</div>
-      <!-- Original Qty Ln -->
-      <div><strong>Original Qty Ln</strong></div>
-      <div class="orig_data" id="originalQtyLn">-</div>
-      <!-- Lot Number -->
-      <div><strong>Lot Number</strong></div>
-      <div id="lotNumber">-</div>
-      <!-- Shipping Destination -->
-      <div><strong>Shipping Destination</strong></div>
-      <div id="shippingDestination">-</div>
-      <!-- Std Thickness -->
-      <div><strong>Std Thickness</strong></div>
-      <div class="std_data" id="stdThickness">-</div>
-      <!-- P/O Number -->
-      <div><strong>P/O Number</strong></div>
-      <div id="poNumber">-</div>
-      <!-- Date of Delivery -->
-      <div><strong>Date of Delivery</strong></div>
-      <div id="dateOfDelivery">-</div>
-      <!-- K Value -->
-      <div><strong>K Value</strong></div>
-      <div class="k_data" id="kValue">-</div>
-      <!-- Customers P/N -->
-      <div><strong>Customers P/N</strong></div>
-      <div id="customersPn">-</div>
-      <!-- EQI -->
-      <div><strong>EQI</strong></div>
-      <div id="eqi">-</div>
-      <!-- Clip -->
-      <div><strong>Clip</strong></div>
-      <div class="clip_data" id="clip">-</div>
-      <!-- Customer Name2 -->
-      <div><strong>Customer Name2</strong></div>
-      <div id="customerName2">-</div>
-      <!-- Customer Name -->
-      <div><strong>Customer Name</strong></div>
-      <div id="customerName">-</div>
-      <!-- Cover -->
-      <div><strong>Cover</strong></div>
-      <div class="last_cover_data" id="cover">-</div>
-      <!-- Coc Number -->
-    </div>
-    <!-- End of grid-container -->
-    <div class="container" style="text-align: left; border: 1px solid; border-top: none;">
-      <div class="row">
-        <div class="col">
-          <label for=""><strong>VC:</strong></label>
+<div class="container-fluid mx-auto">
+  <div class="row align-items-start overflow-auto">
+    <table class="table table-responsive">
+      <div class="grid-container" style="text-align: left;">
+        <!-- Order P/N -->
+        <div><strong>Order P/N</strong></div>
+        <div id="orderPn">-</div>
+        <!-- Order Quantity -->
+        <div><strong>Order Quantity</strong></div>
+        <div id="orderQuantity">-</div>
+        <!-- Model of Tray -->
+        <div><strong>Model of Tray</strong></div>
+        <div class="mdl_tray_data" id="modelOfTray">-</div>
+        <!-- Part Number -->
+        <div><strong>Part Number</strong></div>
+        <div id="partsNumber">-</div>
+        <!-- Quantity of Pack -->
+        <div><strong>Quantity of Pack</strong></div>
+        <div id="quantityOfPack">-</div>
+        <!-- Original Qty Ln -->
+        <div><strong>Original Qty Ln</strong></div>
+        <div class="orig_data" id="originalQtyLn">-</div>
+        <!-- Lot Number -->
+        <div><strong>Lot Number</strong></div>
+        <div id="lotNumber">-</div>
+        <!-- Shipping Destination -->
+        <div><strong>Shipping Destination</strong></div>
+        <div id="shippingDestination">-</div>
+        <!-- Std Thickness -->
+        <div><strong>Std Thickness</strong></div>
+        <div class="std_data" id="stdThickness">-</div>
+        <!-- P/O Number -->
+        <div><strong>P/O Number</strong></div>
+        <div id="poNumber">-</div>
+        <!-- Date of Delivery -->
+        <div><strong>Date of Delivery</strong></div>
+        <div id="dateOfDelivery">-</div>
+        <!-- K Value -->
+        <div><strong>K Value</strong></div>
+        <div class="k_data" id="kValue">-</div>
+        <!-- Customers P/N -->
+        <div><strong>Customers P/N</strong></div>
+        <div id="customersPn">-</div>
+        <!-- EQI -->
+        <div><strong>EQI</strong></div>
+        <div id="eqi">-</div>
+        <!-- Clip -->
+        <div><strong>Clip</strong></div>
+        <div class="clip_data" id="clip">-</div>
+        <!-- Customer Name2 -->
+        <div><strong>Customer Name2</strong></div>
+        <div id="customerName2">-</div>
+        <!-- Customer Name -->
+        <div><strong>Customer Name</strong></div>
+        <div id="customerName">-</div>
+        <!-- Cover -->
+        <div><strong>Cover</strong></div>
+        <div class="last_cover_data" id="cover">-</div>
+        <!-- Coc Number -->
+      </div>
+      <!-- End of grid-container -->
+      <div class="container" style="text-align: left; border: 1px solid; border-top: none;">
+        <div class="row col-md-12">
+          <div class="col">
+            <label for=""><strong>VC:</strong></label>
+          </div>
+          <div class="col">
+            <u id="vc">-</u>
+          </div>
+          <div class="col">
+            <label for=""><strong>Insert Paper:</strong></label>
+          </div>
+          <div class="col">
+            <p><u id="insertPaper">-</u></p>
+          </div>
+          <div class="col">
+            <label for=""><strong>PoCat:</strong></label>
+          </div>
+          <div class="col">
+            <p><u id="pocat">-</u></p>
+          </div>
         </div>
-        <div class="col">
-          <u id="vc">-</u>
-        </div>
-        <div class="col">
-          <label for=""><strong>Insert Paper:</strong></label>
-        </div>
-        <div class="col">
-          <p><u id="insertPaper">-</u></p>
-        </div>
-        <div class="col">
-          <label for=""><strong>PoCat:</strong></label>
-        </div>
-        <div class="col">
-          <p><u id="pocat">-</u></p>
+        <div class="row col-md-12">
+          <div class="col-md-3">
+            <label for=""><strong>VC Document No: </strong></label>
+          </div>
+          <div class="col-md-3">
+            <p><u id="icDOcumentNo" class="text-wrap text-left">- </u></p>
+          </div>
+          <div class="col-md-3">
+            <label for=""><strong>IO Code:</strong></label>
+          </div>
+          <div class="col-md-3">
+            <p><u id="ioCode">-</u></p>
+          </div>
         </div>
       </div>
-      <div class="row">
-        <div class="col">
-          <label for=""><strong>VC Document No:</strong></label>
-        </div>
-        <div class="col">
-          <p><u id="vcDocumentNo">-</u></p>
-        </div>
-        <div class="col">
-        </div>
-        <div class="col">
-        </div>
-        <div class="col">
-          <label for=""><strong>IO Code:</strong></label>
-        </div>
-        <div class="col">
-          <p><u id="ioCode">-</u></p>
-        </div>
-      </div>
-    </div>
 
+    </table>
+  </div>
 </div>
-</table>
 <!-- Grid -->
 
-</div>
 <!-- Ship details with paragraph tag -->
-
-
 
 <div class="container text-center">
   <div class="row align-items-start">
@@ -121,14 +116,15 @@
 </div>
 <script>
   let section = document.getElementById('section').textContent;
-  const getHeaderData = new FormData();
-  console.log(section);
-  getHeaderData.append('assignment_id', localStorage.getItem('assign_id'));
-  getHeaderData.append('section', section);
-  getHeaderData.append('getHeader', 'true');
-  fetch(fetchURL, {
-      method: 'POST',
-      body: getHeaderData
+  const params = {
+    assignment_id: localStorage.getItem('assign_id'),
+    section: section,
+    getHeader: 'true'
+  };
+  const url = new URL(fetchURL);
+  Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
+  fetch(url.toString(), {
+      method: 'GET'
     })
     .then(response => response.json())
     .then(datas => {
@@ -136,6 +132,7 @@
         if (datas.success) {
           for (let data of datas.data) {
             console.log(data);
+            localStorage.setItem('header_data', JSON.stringify(data));
             document.getElementById('orderPn').textContent = data.order_pn;
             document.getElementById('orderQuantity').textContent = data.order_quantity;
             document.getElementById('modelOfTray').textContent = data.tray_model;
@@ -159,6 +156,30 @@
             document.getElementById('pocat').textContent = data.po_cat;
             document.getElementById('ioCode').textContent = data.io_code;
             document.getElementById('remarks').textContent = `Remarks: (${data.remarks})`;
+
+            //   const parts_number = document.getElementById('partsNumber').innerHTML;
+            //   const get_ic_data = new FormData();
+            //   get_ic_data.append('parts_number', parts_number);
+            //   get_ic_data.append('get_ic_data', 'true');
+            //   fetch(fetchURL, {
+            //       method: 'POST',
+            //       body: get_ic_data
+            //     })
+            //     .then(response => response.json())
+            //     .then(datas_ic => {
+            //       console.log(datas_ic);
+            //       if (datas_ic) {
+            //         if (datas_ic.success) {
+            //           for (let d of datas_ic.data)
+            //             document.getElementById('icDOcumentNo').innerHTML += d.doc_document_number + ' ; ';
+            //         }
+            //       }
+            //     })
+            //     .catch(error => {
+            //       console.log(error);
+            //     })
+
+            // }
           }
         }
       }

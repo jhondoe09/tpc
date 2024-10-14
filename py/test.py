@@ -1,15 +1,15 @@
-import os
+import requests
 
-# path = '\\172.16.2.13\htdocs\TPC-endpoint\uploads\ForRead.txt'
-# path = 'E:\\Data\ForRead.txt'
-# path = '//172.16.2.13/htdocs/TPC-endpoint/uploads/ForRead.txt'
-path = 'C:\xampp\htdocs\TPC_VER2\frontend\assets\py\ForRead.txt'
-# openfile = os.startfile(path)
-readFile = open(path, 'r')
-content = readFile.read()
-print(f'Read File Result : {content}')
-readFile.close()
+# Replace 'http://your_server_address/your_file_path' with the actual URL of your file
+file_url = 'http://your_server_address/your_file_path'
 
-print('Opening File - STart')
-openFile = os.startfile(content)
-print('Opening FIle - End')
+try:
+    response = requests.get(file_url)
+    response.raise_for_status()  # Check for errors
+    content = response.content
+
+    # Now you can do something with the file content, for example, print it
+    print(content.decode('utf-8'))
+
+except requests.exceptions.RequestException as e:
+    print(f"Error: {e}")
