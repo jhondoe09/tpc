@@ -17,21 +17,43 @@
       </thead>
       <tbody>
         <tr>
-          <td>AMS2R2J1K-PL</td>
-          <td>220919-59</td>
-          <td>WK220220SA</td>
-          <td>SS22091-01</td>
-          <td>TP90S</td>
-          <td>10</td>
-          <td>110 ± 3</td>
-          <td>S</td>
-          <td>P/L</td>
-          <td>01-30-2023</td>
-      </tr>
+          <td id="partsNumber">-</td>
+          <td id="lotNumber">-</td>
+          <td id="materialLot">-</td>
+          <td id="orderNumber">-</td>
+          <td id="kValue">-</td>
+          <td id="quantity">-</td>
+          <td id="thickness">-</td>
+          <td id="shape">-</td>
+          <td id="surface">-</td>
+          <td id="dateIssued">-</td>
+        </tr>
       </tbody>
     </table>
   </div>
 </div>
 <div class="col-md-6 mx-auto">
-<p class="text-break" style="text-align: center;">Remarks: WITH DOUBLE-SIDE POLISHING/LAPPING</p>
+  <p class="text-break" style="text-align: center;">Remarks: WITH DOUBLE-SIDE POLISHING/LAPPING</p>
 </div>
+<script>
+  // let section_description = localStorage.getItem('sectionDescription');
+  // let lot_number = localStorage.getItem('lotNo');
+  // let parts_number = localStorage.getItem('partsNumber');
+  // let revision_number = localStorage.getItem('revisionNumber');
+  // let assignment_id = localStorage.getItem('assign_id');
+  // let item_code = localStorage.getItem('itemCode');
+  // let sampling = localStorage.getItem('sampling');
+  // let uncontrolled = localStorage.getItem('uncontrolled');
+  // let status = localStorage.getItem('status');
+  // let SubPid = localStorage.getItem('subPid');
+  // let section_id = localStorage.getItem('sectionId');
+  // let date_issued = localStorage.getItem('dateIssued');
+  // let wafer_from = localStorage.getItem('wafer_from');
+  // let wafer_to = localStorage.getItem('wafer_to');
+  // let quantity = localStorage.getItem('quantity');
+
+  // document.getElementById('partsNumber').textContent = parts_number;
+  // document.getElementById('lotNumber').textContent = lot_number;
+  // document.getElementById('quantity').textContent = quantity;
+  // document.getElementById('dateIssued').textContent = date_issued;
+</script>

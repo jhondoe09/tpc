@@ -5,8 +5,13 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TPC</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- <script src="https://cdn.tailwindcss.com"></script> -->
     <?php include 'frontend/layouts/links.php' ?>
+    <style>
+        #main {
+            background-image: linear-gradient(to right, #a5f3fc, #60a5fa);
+        }
+    </style>
 </head>
 <!-- <body id="main" style="background-color: #7dd3fc; font-family: 'Roboto Condensed', sans-serif;"> -->
 
@@ -44,8 +49,8 @@
                                 </div>
                                 <div class="col-md-2 col-sm-12">
                                     <div class="form-group">
-                                            <label for="QrSubmitBtn" class="form-label">Scan</label>
-                                            <button type="submit" id="QrSubmitBtn" name="QrSubmitBtn" class="form-control btn btn-sm"><img src="frontend\assets\images\frame_inspect_FILL0_wght200_GRAD0_opsz24.png" alt=""></button>
+                                        <label for="QrSubmitBtn" class="form-label">Scan</label>
+                                        <button type="submit" id="QrSubmitBtn" name="QrSubmitBtn" class="form-control btn btn-sm"><img src="frontend\assets\images\frame_inspect_FILL0_wght200_GRAD0_opsz24.png" alt=""></button>
                                     </div>
                                 </div>
                             </div>
@@ -59,26 +64,29 @@
 
     <script src="./frontend/js/index.js"></script>
 </body>
-<script src="./frontend/js/html5-qrcode.min.js"></script>              
+<script src="./frontend/js/html5-qrcode.min.js"></script>
 <script>
- // Get the input field and the QR scanner placeholder
- var inputField = document.getElementById('qrCode');
- var qrPlaceholder = document.getElementById('reader');
- 
- document.getElementById('showModal').addEventListener('click', function() {
- // Initialize the QR scanner
- var html5QrcodeScanner = new Html5QrcodeScanner(
- "reader", { fps: 30, qrbox: 250 });
- 
- // Define what happens when a QR code is scanned
- html5QrcodeScanner.render(onScanSuccess);
- 
- function onScanSuccess(decodedText, decodedResult) {
- // Put the scanned data into the input field
- inputField.value = decodedText;
- document.getElementById("QrSubmitBtn").click(); 
- }
- });
+    // Get the input field and the QR scanner placeholder
+    var inputField = document.getElementById('qrCode');
+    var qrPlaceholder = document.getElementById('reader');
+
+    document.getElementById('showModal').addEventListener('click', function() {
+        // Initialize the QR scanner
+        var html5QrcodeScanner = new Html5QrcodeScanner(
+            "reader", {
+                fps: 30,
+                qrbox: 250
+            });
+
+        // Define what happens when a QR code is scanned
+        html5QrcodeScanner.render(onScanSuccess);
+
+        function onScanSuccess(decodedText, decodedResult) {
+            // Put the scanned data into the input field
+            inputField.value = decodedText;
+            document.getElementById("QrSubmitBtn").click();
+        }
+    });
 </script>
 
 </html>

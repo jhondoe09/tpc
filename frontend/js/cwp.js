@@ -1,9 +1,9 @@
 // DEBUGGING
-// const fetchURL = 'https://172.16.2.61/tpc_ver2/backend/query/queries.php';
-// const fetchURLQuery = 'https://172.16.2.61/tpc_ver2/backend/endpoint/query.php';
+const fetchURL = 'https://172.16.2.61/tpc_ver2/backend/query/queries.php';
+const fetchURLQuery = 'https://172.16.2.61/tpc_ver2/backend/endpoint/query.php';
 // FOR DEPLOYMENT
-const fetchURL = 'https://172.16.2.13/tpc_ver2/backend/query/queries.php';
-const fetchURLQuery = 'https://172.16.2.13/tpc_ver2/backend/endpoint/query.php';
+// const fetchURL = 'https://172.16.2.13/tpc_ver2/backend/query/queries.php';
+// const fetchURLQuery = 'https://172.16.2.13/tpc_ver2/backend/endpoint/query.php';
 
 console.log(`JAIRUSKIE BAYOTSKIE INITIALIZED SUCCESSFULLY!`);
 const thisData = JSON.parse(localStorage.getItem('myData'));
@@ -22,21 +22,29 @@ disabledDoneBtn();
 disabledSaveBtn();
 var sidebar = document.getElementById('sidebar');
 var count = 0;
-var countString
+var countString;
+
+
+
+function likeMatch(pattern, subject) {
+    pattern = pattern.replace(/%/g, '.*');
+    const regex = new RegExp(`^${pattern}$`, 'i');
+    return regex.test(subject);
+}
+
+
 for (let data of thisData) {
     // sidebar
     document.getElementById('itemCode').textContent = data.item_code;
     document.getElementById('revisionNo').textContent = data.revision_number;
     document.getElementById('section').textContent = data.section_code;
-
     // headers
     document.getElementById('sectionDescription').textContent = data.section_description;
     document.getElementById('formAssignment').textContent = `Form Assignment: ${data.assignment_id}`;
-    document.getElementById('lotNo').textContent = data.lot_number;
-    document.getElementById('partsNumber').textContent = data.item_parts_number;
-    document.getElementById('quantity').textContent = parseFloat(data.quantity).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    document.getElementById('dateIssue').textContent = data.date_issued;
-
+    // document.getElementById('lotNo').textContent = data.lot_number;
+    // document.getElementById('partsNumber').textContent = data.item_parts_number;
+    // document.getElementById('quantity').textContent = parseFloat(data.quantity).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    // document.getElementById('dateIssue').textContent = data.date_issued;
     count++;
     var subPname = data.SubPname;
     if (subPname.length > 28) {
@@ -64,7 +72,7 @@ for (let data of thisData) {
     data-bs-toggle="tooltip"
     data-bs-placement="right" 
     data-bs-custom-class="custom-tooltip" 
-    data-bs-title="${data.Pname} - ${data.SubPname} ${reworked == true ? '(Reworked)' : ''}" 
+    data-bs-title="${data.key_code} - ${data.SubPname} ${reworked == true ? '(Reworked)' : ''}" 
     style="text-align:left" 
     value="${data.SubPid}" 
     data-id="${data.SubPid}" 
@@ -89,6 +97,7 @@ for (let data of thisData) {
     // }
     sidebar.innerHTML += button;
 
+    localStorage.setItem('sectionDescription', data.section_description);
     localStorage.setItem('lotNo', data.lot_number);
     localStorage.setItem('partsNumber', data.item_parts_number);
     localStorage.setItem('revisionNumber', data.revision_number);
@@ -100,13 +109,28 @@ for (let data of thisData) {
     localStorage.setItem('subPid', data.SubPid);
     localStorage.setItem('sectionId', data.section_id);
     localStorage.setItem('dateIssued', data.date_issued);
+    localStorage.setItem('section', data.section_code);
+    localStorage.setItem('order_pn', data.order_pn);
+    localStorage.setItem('quantity', data.quantity);
+    localStorage.setItem('wafer_from', data.wafer_number_from);
+    localStorage.setItem('wafer_to', data.wafer_number_to);
+
 
 }
 const buttons = document.querySelectorAll(`#btn_process`);
-console.log(buttons);
+// console.log(buttons);
 for (let btn of buttons) {
+    // console.log(btn.getAttribute('data-status'));
     if (btn.getAttribute('data-sub_status') == 'Inactive' && btn.getAttribute('data-status') != 'Done') {
         btn.insertAdjacentHTML('beforeend', '<span class="material-symbols-outlined aligned-bottom">info</span>');
+    }
+    if (btn.getAttribute('data-status') == 'Open') {
+        window.onload = function () {
+            btn.click();
+            btn.scrollIntoView();
+            console.log(btn.getAttribute('data-status'));
+        };
+
     }
 }
 disableEnableBtn();
@@ -116,6 +140,8 @@ const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstra
 // Sidebar Button Process Event
 document.querySelectorAll('.btn_process').forEach(button => {
     button.addEventListener('click', () => {
+        document.getElementById('reference_p').classList.add('d-none');
+        document.getElementById('nav_condition').classList.add('d-none');
         const tableBody = document.getElementById('table');
         tableBody.innerHTML = '';
         var divContainer = document.getElementById('attachContainer');
@@ -220,8 +246,9 @@ document.querySelectorAll('.btn_process').forEach(button => {
         })
             .then(response => response.json())
             .then(attached_data => {
-                console.log(attached_data);
-                if (attached_data.length > 1) {
+                console.log(`attached_data.length${attached_data.length}`);
+                console.log(attached_data[0]);
+                if (attached_data[0] != 0) {
                     let attachment_count = 0
                     // console.log(badger);
                     for (let data of attached_data) {
@@ -385,7 +412,6 @@ document.querySelectorAll('.btn_process').forEach(button => {
             })
     })
 });
-
 // Save Button Event
 const saveButton = document.getElementById('saveButton');
 saveButton.addEventListener('click', function () {
@@ -431,6 +457,19 @@ saveButton.addEventListener('click', function () {
                     console.error(error);
                 })
             for (let data of fetched) {
+                console.log(data);
+                // let myPromise = new Promise(function (myResolve, myReject) {
+                //     let x = 0;
+                //     if (second_tbl_data.success) {
+                //         myResolve(second_tbl_data.success);
+                //     } else {
+                //         myReject(second_tbl_data.success);
+                //     }
+                // });
+                // myPromise.then(
+                //     function (value) { get_third_tbl_data(value, operator_number); },
+                //     function (error) { get_third_tbl_data(error, operator_number); }
+                // );
                 // localStorage.setItem('save_assignId', data.assignment_id);
                 // localStorage.setItem('save_lotNumber', data.lot_number);
                 // localStorage.setItem('save_partsNumber', data.parts_number);
@@ -477,8 +516,9 @@ batchProcessedBtn.addEventListener('click', function () {
                 // DEBUGGING
                 window.open(`https://172.16.2.61/batch_process_ver2/parallel.html?SubPid=${subPid}&AssignmentId=${assign_id}`);
                 // DEPLOYMENT
-                // window.open("https://172.16.2.13/batch_process_ver2/parallel.html?SubPid=${subPid}&AssignmentId=${assign_id}", "TPC Batch Process[Parallel]", 'toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, copyhistory=no, width='+w+', height='+h+', top='+top+', left='+left);
                 // window.open(`https://172.16.2.13/batch_process_ver2/parallel.html?SubPid=${subPid}&AssignmentId=${assign_id}`);
+
+                // window.open("https://172.16.2.13/batch_process_ver2/parallel.html?SubPid=${subPid}&AssignmentId=${assign_id}", "TPC Batch Process[Parallel]", 'toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, copyhistory=no, width='+w+', height='+h+', top='+top+', left='+left);
             }
         }
         // const lot_Number = localStorage.getItem('lotNo');
@@ -1087,7 +1127,6 @@ function operatorValidate() {
     let current_operator_id = document.getElementById('scanId').value;
     let id_number = localStorage.getItem('data_id_number');
     let newId = `00${id_number}`;
-    console.log(current_operator_id);
     if (current_operator_id == newId || current_operator_id == id_number) {
         valid = true;
         // document.getElementById('closeModal').click(); 
@@ -1243,73 +1282,122 @@ function validate() {
 }
 // Done Process Function
 function doneProcess() {
+    let count2 = 0;
     let buttonSectionId = localStorage.getItem('buttonSectionId');
     let buttonAssignmentId = localStorage.getItem('buttonAssignmentId');
     let buttonMainProdId = localStorage.getItem('buttonMainProdId');
     let buttonSequenceNumber = localStorage.getItem('buttonSequenceNumber');
-
-    const doneProcessData = new FormData();
-
-    doneProcessData.append('section_id', buttonSectionId);
-    doneProcessData.append('assignment_id', buttonAssignmentId);
-    doneProcessData.append('main_prod_id', buttonMainProdId);
-    doneProcessData.append('sequence_number', buttonSequenceNumber);
-    doneProcessData.append('doneProcess', 'true');
-
+    let batchNumber = localStorage.getItem('batchNumber');
+    let SubPid = localStorage.getItem('SUBPID');
+    const doneBatchProcessData = new FormData();
+    doneBatchProcessData.append('SubPid', SubPid);
+    doneBatchProcessData.append('batch_number', batchNumber);
+    doneBatchProcessData.append('get_batched', 'true');
     fetch(fetchURL, {
         method: 'POST',
-        body: doneProcessData
+        body: doneBatchProcessData
     })
         .then(response => response.json())
-        .then(data => {
-            console.log(data);
-            let item_code = localStorage.getItem('itemCode');
-            let parts_number = localStorage.getItem('partsNumber');
-            let lot_number = localStorage.getItem('lotNo');
-            let date_issued = localStorage.getItem('dateIssued');
-            let revision_number = localStorage.getItem('revisionNumber');
-            let sectionId = localStorage.getItem('sectionId');
-            let assign_id = localStorage.getItem('assign_id');
-            // console.log(`item_code${item_code},parts_number ${parts_number}, lot_number${lot_number}, date_issued${date_issued},revision_number ${revision_number}`);
+        .then(datas => {
+            if (datas) {
+                if (datas.success) {
+                    let count = datas.data.length;
+                    for (let data of datas.data) {
+                        const batchProcess = new FormData();
 
-            const refreshData = new FormData();
-            refreshData.append('item_code', item_code);
-            refreshData.append('parts_number', parts_number);
-            refreshData.append('lot_number', lot_number);
-            refreshData.append('date_issued', date_issued);
-            refreshData.append('revision_number', revision_number);
-            refreshData.append('assignment_id', assign_id);
-            refreshData.append('QrSubmitBtn', 'true');
-            fetch(fetchURL, {
-                method: 'POST',
-                body: refreshData
-            })
-                .then(response => response.json())
-                .then(thisData => {
-                    localStorage.setItem('myData', JSON.stringify(thisData));
-                    let timerInterval
-                    Swal.fire({
-                        html: data.message,
-                        timer: 1000,
-                        icon: 'success',
-                        showConfirmButton: false,
-                        timerProgressBar: true,
-                        allowOutsideClick: false,
-                        didOpen: () => {
-                            // Swal.showLoading()
-                        },
-                        willClose: () => {
-                            clearInterval(timerInterval)
-                        }
-                    }).then((result) => {
-                        if (result.dismiss === Swal.DismissReason.timer) {
-                            if (localStorage.getItem('myData') != null) {
-                                // saveBtn.click();
-                                location.reload(true);
-                            }
-                        }
-                    })
-                })
+                        batchProcess.append('SubPid', SubPid);
+                        batchProcess.append('assignment_id', data.assignment_id);
+                        batchProcess.append('get_batched_process', 'true');
+                        fetch(fetchURL, {
+                            method: 'POST',
+                            body: batchProcess
+                        })
+                            .then(response => response.json())
+                            .then(datas => {
+                                if (datas) {
+                                    if (datas.success) {
+                                        console.log(datas);
+                                        count2++;
+                                        if (count2 == count) {
+                                            // const doneProcessData = new FormData();
+
+                                            // doneProcessData.append('section_id', buttonSectionId);
+                                            // doneProcessData.append('assignment_id', buttonAssignmentId);
+                                            // doneProcessData.append('main_prod_id', buttonMainProdId);
+                                            // doneProcessData.append('sequence_number', buttonSequenceNumber);
+                                            // doneProcessData.append('doneProcess', 'true');
+
+                                            // fetch(fetchURL, {
+                                            //     method: 'POST',
+                                            //     body: doneProcessData
+                                            // })
+                                            //     .then(response => response.json())
+                                            //     .then(data => {
+                                            console.log(datas);
+                                            let item_code = localStorage.getItem('itemCode');
+                                            let parts_number = localStorage.getItem('partsNumber');
+                                            let lot_number = localStorage.getItem('lotNo');
+                                            let date_issued = localStorage.getItem('dateIssued');
+                                            let revision_number = localStorage.getItem('revisionNumber');
+                                            let sectionId = localStorage.getItem('sectionId');
+                                            let assign_id = localStorage.getItem('assign_id');
+                                            // console.log(`item_code${item_code},parts_number ${parts_number}, lot_number${lot_number}, date_issued${date_issued},revision_number ${revision_number}`);
+
+                                            const refreshData = new FormData();
+                                            refreshData.append('item_code', item_code);
+                                            refreshData.append('parts_number', parts_number);
+                                            refreshData.append('lot_number', lot_number);
+                                            refreshData.append('date_issued', date_issued);
+                                            refreshData.append('revision_number', revision_number);
+                                            refreshData.append('assignment_id', assign_id);
+                                            refreshData.append('QrSubmitBtn', 'true');
+                                            fetch(fetchURL, {
+                                                method: 'POST',
+                                                body: refreshData
+                                            })
+                                                .then(response => response.json())
+                                                .then(thisData => {
+                                                    localStorage.setItem('myData', JSON.stringify(thisData));
+                                                    let timerInterval
+                                                    Swal.fire({
+                                                        html: datas.message,
+                                                        timer: 1000,
+                                                        icon: 'success',
+                                                        showConfirmButton: false,
+                                                        timerProgressBar: true,
+                                                        allowOutsideClick: false,
+                                                        didOpen: () => {
+                                                            // Swal.showLoading()
+                                                        },
+                                                        willClose: () => {
+                                                            clearInterval(timerInterval)
+                                                        }
+                                                    }).then((result) => {
+                                                        if (result.dismiss === Swal.DismissReason.timer) {
+                                                            if (localStorage.getItem('myData') != null) {
+                                                                // saveBtn.click();
+                                                                location.reload(true);
+                                                            }
+                                                            else {
+                                                                window.location.href = `https://172.16.2.13/tpc_ver2/index.php`;
+                                                            }
+                                                        }
+                                                    })
+                                                })
+                                            // })
+                                            // .catch(error => {
+                                            //     console.log(error);
+                                            // })
+                                        }
+                                    }
+                                }
+                            })
+                            .catch(error => {
+                                console.log(error);
+                            })
+                    }
+                }
+            }
         })
         .catch(error => {
             console.log(error);
@@ -1386,21 +1474,19 @@ function calculate(with_judgement, sequence_number) {
 function calculateBlade(with_judgement, sequence_number) {
     if (with_judgement == 1 || with_judgement == '1') {
         let waferInput = document.getElementById(`actual_value_${sequence_number}`);
-        let targetVal = document.getElementById(`target_value_${sequence_number}`).textContent;
+        let targetVal = document.getElementById(`target_value_${sequence_number}`).textContent.toLowerCase();
         let newTargetVal = targetVal.toLowerCase();
-        let inputVal = waferInput.value;
+        let inputVal = waferInput.value.toLowerCase();
         const judgment = document.getElementById(`condition_judgement_${sequence_number}`);
         if (inputVal == targetVal || inputVal == newTargetVal) {
             judgment.textContent = 'Pass'
             judgement.classList.remove('text-danger');
             judgement.classList.add('text-success');
-            // console.log('JAI GAY');
         }
         else {
             judgment.textContent = 'Fail'
             judgement.classList.remove('text-success');
             judgement.classList.add('text-danger');
-            // console.log('JAI GAY GIHAPON');
         }
     }
 }
@@ -1451,30 +1537,19 @@ function onchange_select(sequence_number, with_judgement) {
                 judgement.textContent = 'Pass';
                 judgement.classList.remove('text-danger');
                 judgement.classList.add('text-success');
-                // console.log(actual_value.textContent);
-                // console.log(select.value);
             }
             else {
-                // console.log(actual_value.textContent);
-                // console.log(select.value);
                 judgement.textContent = 'Fail';
                 judgement.classList.remove('text-success');
                 judgement.classList.add('text-danger');
             }
         }
     }
-    // console.log(data);
 }
 
 // Table Click Function
 function tableClick(id_number, sub_pid, item_parts_number, item_code, revision_number, lot_number, assign_id, operator_number, wafer_number_from, wafer_number_to, batch_number) {
 
-    // console.log(`Operator ID: ${operator_id},
-    // SubPid: ${subPid},
-    // Item Parts Number: ${item_parts_number},
-    // Item Code: ${item_code},
-    // Revision Number: ${revision_number},
-    // Lot Number: ${lot_number}`);
     operatorValidate();
     let operatorValidity = operatorValidate();
     const tableData = new FormData();
@@ -1499,7 +1574,6 @@ function tableClick(id_number, sub_pid, item_parts_number, item_code, revision_n
 
             const tableBody = document.getElementById('table');
             if (returnedData[0] == '0' || returnedData[0] == null) {
-                console.log('WLAY SUD');
                 tableBody.innerHTML = '';
             }
             else {
@@ -1507,7 +1581,6 @@ function tableClick(id_number, sub_pid, item_parts_number, item_code, revision_n
                 let newSequence = 0;
                 let tableStatus = localStorage.getItem('SubProcessStatus');
                 for (let data of returnedData) {
-                    // console.log(data.field_type_selection);
                     newSequence++;
                     if (tableStatus == 'Open' && operatorValidity) {
                         localStorage.setItem('field_type', data.field_type);
@@ -1532,7 +1605,10 @@ function tableClick(id_number, sub_pid, item_parts_number, item_code, revision_n
                                     <td>${data.min_value ? data.min_value : data.minimum_value}</td>
                                     <td>${data.max_value ? data.max_value : data.maximum_value}</td>
                                     <td id="condition_judgement_${data.sequence_number}">${data.condition_judgement ? data.condition_judgement : ''}</td>
-                                    <td><button type="button" class="btn btn-outline-none" onclick="addRow(${data.with_judgement}, ${data.sequence_number})"><span class="material-symbols-outlined">shadow_add</span></button></td>
+                                    <td>
+                                        <button type="button" class="btn btn-outline-none" onclick="addRow(${data.with_judgement}, ${data.sequence_number})"><span class="material-symbols-outlined">shadow_add</span></button>
+                                        <button type="button" class="btn btn-outline-none" onclick="addCondition()"><span class="material-symbols-outlined">difference</span></button>
+                                    </td>
                                 </tr>
                                 `;
                                 tableBody.innerHTML += tableRow;
@@ -1637,7 +1713,6 @@ function tableClick(id_number, sub_pid, item_parts_number, item_code, revision_n
                                 `;
                                 tableBody.innerHTML += tableRow;
                                 const checkbox = document.getElementById(`actual_value_${data.sequence_number}`);
-                                // console.log(checkbox.value);
                                 if (parseInt(checkbox.value) > 0) {
                                     checkbox.setAttribute('checked', 'true');
                                 }
@@ -1718,43 +1793,13 @@ function tableClick(id_number, sub_pid, item_parts_number, item_code, revision_n
                                 </tr>
                             `;
 
-
-                            // const field_id = data.field_id;
-                            // const post = new FormData();
-                            // post.append('field_id', field_id);
-                            // fetch('https://172.16.2.13/tpc_sample/backend/endpoint/fieldSub.php', {
-                            //     method: 'POST',
-                            //     body: post
-                            // })
-                            //     .then(response => response.json())
-                            //     .then(data3 => {
-                            //         console.log(data3);
-                            // console.log(select);
-                            // const select = document.getElementById(`field_sub_${data.sequence_number ? data.sequence_number : data.sequence_number}`);
-                            // console.log(select);
-                            // // for(let i = 0; i < options.length; i ++)
-                            // // {
-
-                            // // const option = options.map(item => `
-                            // // <option value="${item.field_selection_description}">
-                            // //     ${item.field_selection_description}
-                            // // </option>
-                            // // `).join("");
-                            // // select.innerHTML = option;
-                            // // }
-                            //     })
-
-                            // const tableBody = document.querySelector('#main_table tbody');
-
                             tableBody.innerHTML += tableRow;
                             const select = document.getElementById(`actual_value_${data.sequence_number ? data.sequence_number : data.sequence_number}`);
-                            // console.log(data.option_value);
                             if (data.option_value) {
                                 const options = data.option_value.split("|");
                                 const default_option = `<option selected>Open this select menu</option>`;
                                 select.innerHTML += default_option;
                                 for (let i = 0; i < options.length; i++) {
-                                    // console.log(options);
                                     const option = `
                                         <option id="opt_${i}" value="${options[i].trim()}">
                                             ${options[i].trim()}
@@ -1763,7 +1808,6 @@ function tableClick(id_number, sub_pid, item_parts_number, item_code, revision_n
                                     if (data.actual_value == options[i].trim()) {
                                         console.log(select.querySelector(`#opt_${i}`));
                                         select.querySelector(`#opt_${i}`).setAttribute('selected', 'selected');
-                                        // select.querySelector(`option`).setAttribute('selected', 'selected');
                                     }
                                 }
                             }
@@ -1779,8 +1823,6 @@ function tableClick(id_number, sub_pid, item_parts_number, item_code, revision_n
                         if (localStorage.getItem('buttonResultType') == 'Chips') {
                             const wafer_from = document.getElementById(`wafer_number_from_${data.sequence_number ? data.sequence_number : newSequence}`);
                             const wafer_to = document.getElementById(`wafer_number_to_${data.sequence_number ? data.sequence_number : newSequence}`);
-                            // console.log(wafer_from);
-                            // console.log(wafer_to);
                             wafer_from.readOnly = true;
                             wafer_from.classList.add('bg-light');
                             wafer_to.readOnly = true;
@@ -1810,7 +1852,6 @@ function tableClick(id_number, sub_pid, item_parts_number, item_code, revision_n
                             div.innerHTML = p;
                         }
                         else {
-                            // tableBody.innerHTML = '';
                             var tableRow = `
                                 <tr>
                                 <td style="display: none;">${data.condition_item_id ? data.condition_item_id : data.condition_prd_id}</td>
@@ -1853,12 +1894,10 @@ function addRow(with_judgement, sequence_number) {
     const td2 = tr1.querySelectorAll(`td`);
     title.textContent = td2[5].textContent;
     console.log(add_row_with_judgement.value);
-    // console.log(td);
     insert_btn.addEventListener('click', function () {
         event.preventDefault();
         const tableBody = document.getElementById('table');
         let total_tr = tableBody.querySelectorAll(`tr`).length;
-        // console.log(total_tr);
         const tr = document.getElementById(`tr_${add_row_sequence.value}`);
         const td = tr.querySelectorAll(`td`);
         if (parseInt(row_start.value) > parseInt(row_end.value)) {
@@ -1869,7 +1908,6 @@ function addRow(with_judgement, sequence_number) {
             )
         }
         else {
-            console.log(tr);
             const total_wafer_length = parseInt(row_end.value) - parseInt(row_start.value) + 1;
             let row_count = row_end.value;
             for (let i = 0; i < total_wafer_length; i++) {
@@ -1877,13 +1915,12 @@ function addRow(with_judgement, sequence_number) {
                 let tag = td[6].querySelector(`#actual_value_${add_row_sequence.value}`).tagName;
                 console.log(tag);
                 let field_type = td[6].querySelector(`#actual_value_${add_row_sequence.value}`).getAttribute(`data-bs-field_type`);
-                // console.log(field_type);
                 if (tag == 'SELECT') {
                     let option_value = td[6].querySelector(`#actual_value_${add_row_sequence.value}`).getAttribute(`data-bs-option_value`);
-                    // console.log(option_value);
+                    let selected_value = td[6].querySelector(`#actual_value_${add_row_sequence.value}`).value;
                     var tableRow = `
                     <tr class="table-primary" id="tr_${total_tr}">
-                        <td style="display: none;">${td[0].textContent}</td>
+                        <td style="display: none;"></td>
                         <td>${td[1].textContent}</td>
                         <td scope="row">${add_row_sequence.value}</td>
                         <td>
@@ -1905,48 +1942,72 @@ function addRow(with_judgement, sequence_number) {
                     </tr>
                         `;
                     tr.insertAdjacentHTML('afterend', tableRow);
-                    // console.log(select);
                     const select = document.getElementById(`actual_value_${total_tr}`);
-                    // const default_option = `<option selected>Open this select menu</option>`;
-                    // select.innerHTML += default_option;
                     let options = td[6].querySelectorAll(`option`);
                     for (let j = 0; j < options.length; j++) {
-                        // console.log(options[j].innerText);
                         const opt = `
-                            <option value="${options[j].innerText.trim()}">
+                            <option value="${options[j].innerText.trim()}" id="option_${j}_${total_tr}">
                                 ${options[j].innerText.trim()}
                             </option>`;
                         select.innerHTML += opt;
+                        if (selected_value == options[j].innerText.trim()) {
+                            select.querySelector(`#option_${j}_${total_tr}`).setAttribute('selected', 'true');
+                        }
                     }
                 }
                 else {
                     if (td[6].querySelector(`input`).type == 'checkbox') {
-                        var tableRow = `
-                        <tr class="table-primary" id="tr_${total_tr}">
-                            <td style="display: none;">${td[0].textContent}</td>
-                            <td>${td[1].textContent}</td>
-                            <td scope="row">${add_row_sequence.value}</td>
-                            <td>
-                                <input type="number" id="wafer_number_from_${total_tr}" class="form-control" value="${row_count}">
-                            </td>
-                            <td>
-                                <input type="number" id="wafer_number_to_${total_tr}" class="form-control" value="${row_count}">
-                            </td>
-                            <td>${td[5].textContent}</td>
-                            <td>
-                                <input type="${td[6].querySelector(`input`).type}" onchange="onchange_checkbox(${total_tr}, ${add_row_with_judgement.value})" class="${td[6].querySelector('input').classList}" value="${td[6].querySelector(`input`).value}" id="actual_value_${total_tr}" data-bs-field_type="${field_type}" data-bs-with_judgement="${add_row_with_judgement.value}" required>
-                            </td>
-                            <td id="target_value_${total_tr}">${td[7].textContent}</td>
-                            <td id="min_value_${total_tr}">${td[8].textContent}</td>
-                            <td id="max_value_${total_tr}">${td[9].textContent}</td>
-                            <td id="condition_judgement_${total_tr}"></td>
-                            <td><button type="button" class="btn btn-outline-none" onclick="removeRow(${total_tr})"><span class="material-symbols-outlined">shadow_minus</span></button></td>
-                        </tr>`;
+                        if (parseInt(td[6].querySelector(`input`).value) > 0) {
+                            var tableRow = `
+                                <tr class="table-primary" id="tr_${total_tr}">
+                                    <td style="display: none;"></td>
+                                    <td>${td[1].textContent}</td>
+                                    <td scope="row">${add_row_sequence.value}</td>
+                                    <td>
+                                        <input type="number" id="wafer_number_from_${total_tr}" class="form-control" value="${row_count}">
+                                    </td>
+                                    <td>
+                                        <input type="number" id="wafer_number_to_${total_tr}" class="form-control" value="${row_count}">
+                                    </td>
+                                    <td>${td[5].textContent}</td>
+                                    <td>
+                                        <input type="${td[6].querySelector(`input`).type}" onchange="onchange_checkbox(${total_tr}, ${add_row_with_judgement.value})" class="${td[6].querySelector('input').classList}" value="${td[6].querySelector(`input`).value}" id="actual_value_${total_tr}" data-bs-field_type="${field_type}" data-bs-with_judgement="${add_row_with_judgement.value}" checked>
+                                    </td>
+                                    <td id="target_value_${total_tr}">${td[7].textContent}</td>
+                                    <td id="min_value_${total_tr}">${td[8].textContent}</td>
+                                    <td id="max_value_${total_tr}">${td[9].textContent}</td>
+                                    <td id="condition_judgement_${total_tr}">${td[10].textContent}</td>
+                                    <td><button type="button" class="btn btn-outline-none" onclick="removeRow(${total_tr})"><span class="material-symbols-outlined">shadow_minus</span></button></td>
+                                </tr>`;
+                        }
+                        else {
+                            var tableRow = `
+                                <tr class="table-primary" id="tr_${total_tr}">
+                                    <td style="display: none;"></td>
+                                    <td>${td[1].textContent}</td>
+                                    <td scope="row">${add_row_sequence.value}</td>
+                                    <td>
+                                        <input type="number" id="wafer_number_from_${total_tr}" class="form-control" value="${row_count}">
+                                    </td>
+                                    <td>
+                                        <input type="number" id="wafer_number_to_${total_tr}" class="form-control" value="${row_count}">
+                                    </td>
+                                    <td>${td[5].textContent}</td>
+                                    <td>
+                                        <input type="${td[6].querySelector(`input`).type}" onchange="onchange_checkbox(${total_tr}, ${add_row_with_judgement.value})" class="${td[6].querySelector('input').classList}" value="${td[6].querySelector(`input`).value}" id="actual_value_${total_tr}" data-bs-field_type="${field_type}" data-bs-with_judgement="${add_row_with_judgement.value}">
+                                    </td>
+                                    <td id="target_value_${total_tr}">${td[7].textContent}</td>
+                                    <td id="min_value_${total_tr}">${td[8].textContent}</td>
+                                    <td id="max_value_${total_tr}">${td[9].textContent}</td>
+                                    <td id="condition_judgement_${total_tr}">${td[10].textContent}</td>
+                                    <td><button type="button" class="btn btn-outline-none" onclick="removeRow(${total_tr})"><span class="material-symbols-outlined">shadow_minus</span></button></td>
+                                </tr>`;
+                        }
                     }
                     else {
                         var tableRow = `
                         <tr class="table-primary" id="tr_${total_tr}">
-                            <td style="display: none;">${td[0].textContent}</td>
+                            <td style="display: none;"></td>
                             <td>${td[1].textContent}</td>
                             <td scope="row">${add_row_sequence.value}</td>
                             <td>
@@ -1962,7 +2023,7 @@ function addRow(with_judgement, sequence_number) {
                             <td id="target_value_${total_tr}">${td[7].textContent}</td>
                             <td id="min_value_${total_tr}">${td[8].textContent}</td>
                             <td id="max_value_${total_tr}">${td[9].textContent}</td>
-                            <td id="condition_judgement_${total_tr}"></td>
+                            <td id="condition_judgement_${total_tr}">${td[10].textContent}</td>
                             <td><button type="button" class="btn btn-outline-none" onclick="removeRow(${total_tr})"><span class="material-symbols-outlined">shadow_minus</span></button></td>
                         </tr>`;
                     }
@@ -1977,49 +2038,154 @@ function addRow(with_judgement, sequence_number) {
         row_start.value = '';
         row_end.value = '';
     });
+}
 
+function addCondition() {
+    $('#addConditionModal').modal('show');
+    const select = document.getElementById('add_condition_select');
+    const operator_select = document.getElementById('operator_select');
+    const submit_btn = document.getElementById('submit_add_condition');
+    const condition_tbody = document.getElementById('condition_tbody');
+    const add_condition_btn = document.getElementById('add_condition_btn');
+    const table = document.getElementById('reference_table');
+    const data = document.getElementById('formAssignment').textContent.split(':');
+    const assignment_id = data[1];
+    const SubPid = localStorage.getItem('SUBPID');
+    const get_condition = new FormData();
+    get_condition.append('assignment_id', assignment_id);
+    get_condition.append('SubPid', SubPid);
+    get_condition.append('get_conditions', 'true');
+    fetch(fetchURL, {
+        method: 'POST',
+        body: get_condition
+    })
+        .then(response => response.json())
+        .then(datas => {
+            submit_btn.disabled = true;
+            select.innerHTML = '';
+            if (datas) {
+                if (datas.success) {
+                    for (let data of datas.data) {
+                        let options = `<option value="${data.SubPid}">${data.SubPname}</option>`;
+                        select.innerHTML += options;
+                    }
+                    select.addEventListener('change', () => {
+                        const get_operators = new FormData();
+                        get_operators.append('assignment_id', assignment_id);
+                        get_operators.append('SubPid', select.value);
+                        get_operators.append('get_operators', 'true');
+                        fetch(fetchURL, {
+                            method: 'POST',
+                            body: get_operators
+                        })
+                            .then(response => response.json())
+                            .then(datas => {
+                                operator_select.innerHTML = '';
+                                if (datas) {
+                                    if (datas.success) {
+                                        submit_btn.disabled = false;
+                                        for (let i = 1; i <= datas.operator_number; i++) {
+                                            let option = `<option value="${i}">${i}</option>`;
+                                            operator_select.innerHTML += option;
+                                        }
+                                    }
+                                }
+                            })
+                            .catch(error => {
+                                console.log(error);
+                            })
+                    });
+                    submit_btn.addEventListener('click', () => {
+                        const get_conditions = new FormData();
+                        get_conditions.append('assignment_id', assignment_id);
+                        get_conditions.append('SubPid', select.value);
+                        get_conditions.append('operator_number', operator_select.value);
+                        get_conditions.append('get_other_conditions', 'true');
+                        fetch(fetchURL, {
+                            method: 'POST',
+                            body: get_conditions
+                        })
+                            .then(response => response.json())
+                            .then(datas => {
+                                console.log(datas);
+                                if (datas) {
+                                    if (datas.success) {
+                                        document.getElementById('reference_p').classList.remove('d-none');
+                                        document.getElementById('nav_condition').classList.remove('d-none');
+                                        condition_tbody.innerHTML = '';
+                                        for (let data of datas.data) {
+                                            var row =
+                                                `
+                                            <tr>
+                                                <td class="table-primary">${data.id_number}</td>
+                                                <td class="table-secondary">${data.sequence_number}</td>
+                                                <td class="table-success">${data.wafer_start}</td>
+                                                <td class="table-danger">${data.wafer_end}</td>
+                                                <td class="table-warning">${data.condition_description}</td>
+                                                <td class="table-info">${data.actual_value}</td>
+                                                <td class="table-light">${data.target_value}</td>
+                                                <td class="table-dark">${data.minimum_value}</td>
+                                                <td class="table-info">${data.maximum_value}</td>
+                                                <td class="table-light">${data.condition_judgement}</td>
+                                                <td class="table-dark"><input class="form-check-input" type="checkbox" value="" id="flexCheckDefault"></td>
+                                            </tr>
+                                            `;
+                                            condition_tbody.innerHTML += row;
+                                        }
+                                        add_condition_btn.addEventListener('click', () => {
+                                            var checkBoxes = document.querySelectorAll('input[type="checkbox"]:checked');
+                                            checkBoxes.forEach(chk => {
+                                                const tbl_tr = chk.closest(`tr`);
+                                                const td_element = tbl_tr.querySelectorAll('td');
+                                                const id_number = td_element[0].textContent;
+                                                const sequence_number = td_element[1].textContent;
+                                                const wafer_start = td_element[2].textContent;
+                                                const wafer_end = td_element[3].textContent;
+                                                const condition = td_element[4].textContent;
+                                                const actual_value = td_element[5].textContent;
+                                                const target_value = td_element[6].textContent;
+                                                const min_value = td_element[7].textContent;
+                                                const max_value = td_element[8].textContent;
+                                                const judgement = td_element[9].textContent;
 
+                                                const row = `
+                                                <tr>
+                                                    <td class="table-primary">${id_number}</td>
+                                                    <td class="table-secondary">${sequence_number}</td>
+                                                    <td class="table-success">${wafer_start}</td>
+                                                    <td class="table-danger">${wafer_end}</td>
+                                                    <td class="table-warning">${condition}</td>
+                                                    <td class="table-info">${actual_value}</td>
+                                                    <td class="table-light">${target_value}</td>
+                                                    <td class="table-dark">${min_value}</td>
+                                                    <td class="table-info">${max_value}</td>
+                                                    <td class="table-light">${judgement}</td>
+                                                </tr>`;
+                                                table.innerHTML += row;
+                                            })
+                                            submit_btn.disabled = false;
+                                            operator_select.innerHTML = '';
+                                            condition_tbody.innerHTML = '';
+                                            $('#addConditionModal').modal('hide');
+                                        });
+                                    }
+                                }
+                            })
+                            .catch(error => {
+                                console.log(error);
+                            })
+                    });
+                }
+            }
+        })
+        .catch(error => {
+            console.log(error);
+        })
 
-    // const newRow = document.createElement('tr');
-    // for (let i = 0; i < tr.cells.length; i++) {
-    // const cell = tr.cells[i].cloneNode(true);
-    // newRow.appendChild(cell);
-    // }
-    // tr.insertAdjacentElement('afterend', newRow);
-    // for(let i = 0; i < 1; i ++)
-    // {   
-    //     var tableRow = `
-    //     <tr>
-    //     <td style="display: none;">${td[0].textContent}</td>
-    //     <td>${td[1].textContent}</td>
-    //     <td scope="row">${sequence_number}</td>
-    //     <td>
-    //         <input type="number" id="wafer_number_from_${sequence_number}" class="form-control" value="${td[3].textContent}">
-    //     </td>
-    //     <td>
-    //         <input type="number" id="wafer_number_to_${sequence_number}" class="form-control" value="${td[4].textContent}">
-    //     </td>
-    //     <td>${td[5].textContent}</td>
-    //     <td>
-    //         <input type="date" oninput="calculateBlade(${with_judgement}, ${sequence_number})" class="form-control" value="${td[6].textContent}" id="actual_value_${sequence_number}" required>
-    //     </td>
-    //     <td id="target_value_${sequence_number}">${td[7].textContent}</td>
-    //     <td id="min_value_${sequence_number}">${td[8].textContent}</td>
-    //     <td id="max_value_${sequence_number}">${td[9].textContent}</td>
-    //     <td id="condition_judgement_${sequence_number}">${td[10].textContent}</td>
-    //     </tr>
-    //     `;
-    //     console.log(tableRow)
-    //     tr.insertAdjacentHTML('afterend', tableRow);
-    // }
-
-    // tableBody.innerHTML += tr;
-    // tr.insertAdjacentElement('afterend', tr);
 }
 
 function removeRow(sequence_number) {
     const tr = document.getElementById(`tr_${sequence_number}`);
-    // console.log(tr);
     tr.parentNode.removeChild(tr);
 }
 
@@ -2032,7 +2198,6 @@ function onInputSub() {
 }
 
 function closedSubProcess(ID) {
-    // let ID = document.getElementById('IdScan').value;
     ID = Number(ID).toString();
     const operatorData = new FormData();
     operatorData.append('id_number', ID);
@@ -2060,6 +2225,7 @@ function closedSubProcess(ID) {
             console.error(error);
         });
 }
+
 const openBtn = document.getElementById('subProcessOpen');
 openBtn.addEventListener('click', function () {
     event.preventDefault();
@@ -2100,8 +2266,6 @@ openBtn.addEventListener('click', function () {
                         let sectionId = localStorage.getItem('sectionId');
                         let assign_id = localStorage.getItem('assign_id');
 
-                        // console.log(`item_code${item_code},parts_number ${parts_number}, lot_number${lot_number}, date_issued${date_issued},revision_number ${revision_number}`);
-
                         const refreshData = new FormData();
                         refreshData.append('item_code', item_code);
                         refreshData.append('parts_number', parts_number);
@@ -2119,10 +2283,7 @@ openBtn.addEventListener('click', function () {
                                 console.log(data);
                                 localStorage.setItem('myData', JSON.stringify(data));
                                 localStorage.setItem('sectionId', JSON.stringify(sectionId));
-                                // const thisData2 = JSON.parse(localStorage.getItem('myData'));
-                                // console.log(thisData2);
                                 if (localStorage.getItem('myData') != null || localStorage.getItem('myData') != 0) {
-                                    // saveBtn.click();
                                     location.reload(true);
                                 }
                             })
@@ -2150,13 +2311,13 @@ function getClosedSubProcess() {
         .then(datas => {
             console.log(datas);
             for (let data of datas) {
-                const option = `<option value="${data.main_prd_id}">${data.SubPname ? data.SubPname : ''}</option>`
+                const option = `< option value = "${data.main_prd_id}" > ${data.SubPname ? data.SubPname : ''}</option > `
                 select.innerHTML += option;
             }
             // if(datas[0] == null || datas[0] == 0)
             // {
 
-            //     const iframe = `<iframe width="1280" height="720" src="https://www.youtube.com/embed/u-dEnJpCGAQ" title="Wildlife - The Fascinating World of Wild Animals | Full Series | Free Documentary Nature" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>`
+            //     const iframe = `< iframe width = "1280" height = "720" src = "https://www.youtube.com/embed/u-dEnJpCGAQ" title = "Wildlife - The Fascinating World of Wild Animals | Full Series | Free Documentary Nature" frameborder = "0" allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen ></iframe > `
             //     document.getElementById(`main_content`).innerHTML = iframe;
             // }
         })
@@ -2164,7 +2325,7 @@ function getClosedSubProcess() {
             console.error(error);
             // if(error)
             // {
-            //     const iframe = `<iframe width="1280" height="720" src="https://www.youtube.com/embed/u-dEnJpCGAQ" title="Wildlife - The Fascinating World of Wild Animals | Full Series | Free Documentary Nature" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>`
+            //     const iframe = `< iframe width = "1280" height = "720" src = "https://www.youtube.com/embed/u-dEnJpCGAQ" title = "Wildlife - The Fascinating World of Wild Animals | Full Series | Free Documentary Nature" frameborder = "0" allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen ></iframe > `
             //     document.getElementById(`main_content`).innerHTML += iframe;
             // }
         });
@@ -2185,9 +2346,9 @@ function getYieldPercentage(SubPid, assignment_id) {
                 for (let data of datas) {
                     if (data.quantity_in != '' && data.quantity_out != '' || data.quantity_in != 'null' && data.quantity_out != 'null') {
                         const dataYield = (parseInt(data.quantity_out) / parseInt(data.quantity_in)) * 100;
-                        document.getElementById('dataYieldSpan').textContent = `Yield: ${dataYield.toFixed(2) ? dataYield.toFixed(2) : 0}%`
+                        document.getElementById('dataYieldSpan').textContent = `Yield: ${dataYield.toFixed(2) ? dataYield.toFixed(2) : 0}% `
                         if (isNaN(dataYield)) {
-                            document.getElementById('dataYieldSpan').textContent = `Yield: 0%`
+                            document.getElementById('dataYieldSpan').textContent = `Yield: 0 % `
                         }
                         if (dataYield >= 90) {
                             enabledDoneBtn();
@@ -2207,4 +2368,5 @@ function getYieldPercentage(SubPid, assignment_id) {
             console.log(error);
         })
 }
+
 getClosedSubProcess();
