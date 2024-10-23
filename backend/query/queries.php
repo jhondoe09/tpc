@@ -3,6 +3,7 @@ $GLOBALS['conn'] =  require_once '../config/conn.php';
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
+
 function handleScanQRRequest($postData)
 {
   require '../config/config.php';
@@ -14,8 +15,15 @@ function handleScanQRRequest($postData)
   $date_issued = $postData['date_issued'];
   $revision_number = $postData['revision_number'];
   $assignment_id = $postData['assignment_id'];
+
   $sql = "SELECT t1.assignment_id,
       t1.assignment_status,
+      t1.po_number,
+      t1.order_pn,
+      t1.wafer_number_from,
+      t1.wafer_number_to,
+      t1.date_issued as date2,
+      t1.delivery_date,
       t2.main_prd_id,
       t2.assignment_id,
       t2.section_id,
@@ -38,11 +46,17 @@ function handleScanQRRequest($postData)
       t4.section_code,
       t4.section_description,
       t5.Pid,
-      t5.Pname
+      t5.Pname,
+      t5.key_code
       FROM form_assignment_tbl t1 LEFT JOIN $tpc_prod_dbs.tpc_main_tbl t2 ON t1.assignment_id = t2.assignment_id LEFT JOIN setup_sub_process_tbl t3 ON t2.SubPid = t3.SubPid LEFT JOIN setup_section_tbl t4 ON t1.section_id = t4.section_id LEFT JOIN `setup_key_process_tbl` t5 ON t3.Pid = t5.Pid WHERE t1.item_code = '$item_code' AND t1.item_parts_number = '$parts_number' AND t1.lot_number = '$lot_number' AND t1.date_issued = '$date_issued' AND t1.revision_number = '$revision_number' AND t1.assignment_id = '$assignment_id' ORDER BY t2.sequence_number ASC";
   $result = mysqli_query($tpc_dbs_connection, $sql);
   if (!$result) {
-    die('Failed to execute query: ' . mysqli_error($tpc_dbs_connection));
+    $response = array(
+      'success' => false,
+      'message' => 'Error' . mysqli_error($tpc_dbs_connection)
+    );
+    return $response;
+    $tpc_dbs_connection->close();
   }
   if (mysqli_num_rows($result) > 0) {
     $data = array();
@@ -168,10 +182,14 @@ function handleTableClicked($postData)
   $assign_id = $postData['assignId'];
   $operator_number = $postData['operator_number'];
   $batch_number = $postData['batch_number'];
-  $query = "SELECT t1.*, t2.*, t3.tpc_sub_remarks, t3.SubPid, t3.assignment_id FROM `tpc_condition_tbl` t1 LEFT JOIN $tpc_dbs.field_main_tbl t2 ON t1.field_type = t2.field_type_description INNER JOIN tpc_main_tbl t3 ON t1.assignment_id = t3.assignment_id AND t1.SubPid = t3.SubPid  WHERE t1.`SubPid` = '$sub_pid' AND t1.`item_parts_number` = '$item_parts_number' AND t1.`item_code` = '$item_code' AND t1.`revision_number` = '$revision_number' AND t1.`lot_number` = '$lot_number' AND t1.`id_number` = '$id_number' AND t1.`operator_number`= '$operator_number' AND t1.`batch_id` = '$batch_number' ORDER BY t1.`sequence_number` ASC";
+  $query = "SELECT t1.*, t2.*, t3.tpc_sub_remarks, t3.SubPid, t3.assignment_id FROM `tpc_condition_tbl` t1 LEFT JOIN $tpc_dbs.field_main_tbl t2 ON t1.field_type = t2.field_type_description INNER JOIN tpc_main_tbl t3 ON t1.assignment_id = t3.assignment_id AND t1.SubPid = t3.SubPid  WHERE t1.`SubPid` = '$sub_pid' AND t1.`item_parts_number` = '$item_parts_number' AND t1.`item_code` = '$item_code' AND t1.`revision_number` = '$revision_number' AND t1.`lot_number` = '$lot_number' AND t1.`id_number` = '$id_number' AND t1.`operator_number`= '$operator_number' AND t1.`batch_id` = '$batch_number' AND t1.`assignment_id` = '$assign_id' ORDER BY t1.`sequence_number` ASC";
   $result = mysqli_query($tpc_prod_dbs_connection, $query);
   if (!$result) {
-    die('Unable to fetch data: ERROR ' . mysqli_error($tpc_prod_dbs_connection));
+    $response = array(
+      'message' => 'Unable to get data error=>' . mysqli_error($tpc_prod_dbs_connection)
+    );
+    return $response;
+    $tpc_prod_dbs_connection->close();
   } else {
     if (mysqli_num_rows($result) > 0) {
       $data = array();
@@ -243,6 +261,7 @@ function saveItemConditionsData($postItemsData)
   require '../config/conn.php';
   $tpc_dbs_prod_connection = mysqli_connect($development['server'], $development['username'], $development['password'], $tpc_prod_dbs);
   $tpc_dbs_connection = mysqli_connect($development['server'], $development['username'], $development['password'], $tpc_dbs);
+
   if (isset($postItemsData)) {
     foreach ($postItemsData as $key => $value) {
       if (strpos($key, 'condition_item_id_') === 0) {
@@ -271,44 +290,44 @@ function saveItemConditionsData($postItemsData)
         $option_value = isset($_POST["option_value_" . $index]) ? mysqli_real_escape_string($tpc_dbs_connection, $_POST["option_value_" . $index]) : NULL;
         $with_judgement = isset($_POST["with_judgement_" . $index]) ? mysqli_real_escape_string($tpc_dbs_connection, $_POST["with_judgement_" . $index]) : NULL;
         $judgement = mysqli_real_escape_string($tpc_dbs_connection, isset($_POST["judgement_" . $index]) ? $_POST["judgement_" . $index] : NULL);
-        $sql = "SELECT * FROM `tpc_condition_tbl` WHERE `condition_prd_id` = '$condition_item_id' AND `id_number` = '$id_number' AND `operator_number` = '$batch_operator_number' AND `batch_id` = '$batch_number'";
-        $result = mysqli_query($tpc_dbs_prod_connection, $sql);
-        if (!$result) {
-          $response = array(
-            'success' => false,
-            'message' => "Unable to execute sql: ERROR=> " . mysqli_error($tpc_dbs_prod_connection)
-          );
-        } else {
-          if (mysqli_num_rows($result) > 0) {
-            while (mysqli_fetch_assoc($result)) {
-              $query = "UPDATE `tpc_condition_tbl` SET `wafer_start` = '$wafer_start', `wafer_end` = '$wafer_end', `actual_value` = '$actual_value', `condition_judgement` = '$judgement' WHERE `condition_prd_id` = '$condition_item_id' AND `id_number` = '$id_number' AND `operator_number` = '$batch_operator_number'";
-              $res = mysqli_query($tpc_dbs_prod_connection, $query);
-              if (!$res) {
-                die('Unable to execute query: ERROR=>' . mysqli_error($tpc_dbs_prod_connection));
-              } else {
+
+        if ($sub_pid > 0) {
+          $sql = "SELECT * FROM `tpc_condition_tbl` WHERE `condition_prd_id` = '$condition_item_id' AND `id_number` = '$id_number' AND `operator_number` = '$batch_operator_number' AND `batch_id` = '$batch_number'";
+          $result = mysqli_query($tpc_dbs_prod_connection, $sql);
+          if (!$result) {
+            $response = array(
+              'success' => false,
+              'message' => "Unable to execute sql: ERROR=> " . mysqli_error($tpc_dbs_prod_connection)
+            );
+          } else {
+            if (mysqli_num_rows($result) > 0) {
+              while (mysqli_fetch_assoc($result)) {
+                $query = "UPDATE `tpc_condition_tbl` SET `wafer_start` = '$wafer_start', `wafer_end` = '$wafer_end', `actual_value` = '$actual_value', `condition_judgement` = '$judgement' WHERE `condition_prd_id` = '$condition_item_id' AND `id_number` = '$id_number' AND `operator_number` = '$batch_operator_number'";
+                $res = mysqli_query($tpc_dbs_prod_connection, $query);
+                if (!$res) {
+                  die('Unable to execute query: ERROR=>' . mysqli_error($tpc_dbs_prod_connection));
+                } else {
+                  $response = array(
+                    'success' => true,
+                    'message' => "The [tpc_condition_tbl] Data has been successfuly updated!",
+                    'condition_item_id' => $condition_item_id
+                  );
+                }
+              }
+            } else {
+              $execute = "INSERT INTO `tpc_condition_tbl` (`assignment_id`, `section_id`, `SubPid`, `item_parts_number`, `item_code`, `revision_number`, `lot_number`, `id_number`, `operator_number`, `sequence_number`, `field_type`, `wafer_start`, `wafer_end`, `condition_description`, `actual_value`, `target_value`, `minimum_value`, `maximum_value`, `option_value`, `with_judgement`, `condition_judgement`, `batch_id`) VALUES ('$assignment_id', '$section_id' , '$sub_pid', '$parts_number', '$item_code', '$revision_number', '$lot_number', '$id_no', '$batch_operator_number', '$sequence_no', '$field_type', '$wafer_start', '$wafer_end', '$condition', '$actual_value', '$target_value', '$min_value', '$max_value', '$option_value', '$with_judgement', '$judgement', '$batch_number')";
+              $exec_res = mysqli_query($tpc_dbs_prod_connection, $execute);
+              if ($exec_res) {
                 $response = array(
                   'success' => true,
-                  'message' => "The [tpc_condition_tbl] Data has been successfuly updated!",
-                  'condition_item_id' => $condition_item_id
+                  'message' => "Inserting data from [tpc_condition_tbl] is successfull!"
+                );
+              } else {
+                $response = array(
+                  'success' => false,
+                  'message' => "Inserting data from [tpc_condition_tbl] is a no go!" . mysqli_error($tpc_dbs_prod_connection)
                 );
               }
-            }
-          } else {
-            $execute = "INSERT INTO `tpc_condition_tbl`
-                (`assignment_id`, `section_id`, `SubPid`, `item_parts_number`, `item_code`, `revision_number`, `lot_number`, `id_number`, `operator_number`, `sequence_number`, `field_type`, `wafer_start`, `wafer_end`, `condition_description`, `actual_value`, `target_value`, `minimum_value`, `maximum_value`, `option_value`, `with_judgement`, `condition_judgement`, `batch_id`)
-                VALUES 
-                ('$assignment_id', '$section_id' , '$sub_pid', '$parts_number', '$item_code', '$revision_number', '$lot_number', '$id_no', '$batch_operator_number', '$sequence_no', '$field_type', '$wafer_start', '$wafer_end', '$condition', '$actual_value', '$target_value', '$min_value', '$max_value', '$option_value', '$with_judgement', '$judgement', '$batch_number')";
-            $exec_res = mysqli_query($tpc_dbs_prod_connection, $execute);
-            if ($exec_res) {
-              $response = array(
-                'success' => true,
-                'message' => "Inserting data from [tpc_condition_tbl] is successfull!"
-              );
-            } else {
-              $response = array(
-                'success' => false,
-                'message' => "Inserting data from [tpc_condition_tbl] is a no go!" . mysqli_error($tpc_dbs_prod_connection)
-              );
             }
           }
         }
@@ -458,6 +477,406 @@ function handleUpdateRemarks($postData)
   }
 }
 
+function handleGetSubProcess($postData)
+{
+  require '../config/config.php';
+  require '../config/conn.php';
+  $tpc_dbs_connection = mysqli_connect($development['server'], $development['username'], $development['password'], $tpc_prod_dbs);
+  $assignment_id = $postData['assignment_id'];
+  $sql = "SELECT t1.*, t2.section_id, t2.Pid, t2.SubPname, t2.process_type, t2.sub_code FROM tpc_main_tbl t1 LEFT JOIN $tpc_dbs.setup_sub_process_tbl t2 ON t1.SubPid = t2.SubPid WHERE t1.assignment_id = '$assignment_id' ORDER BY t1.sequence_number ASC";
+  $result = mysqli_query($tpc_dbs_connection, $sql);
+  if (!$result) {
+    $response = array(
+      'success' => false,
+      'message' => 'Unable to fetch sub process data error =>' . mysqli_error($tpc_dbs_connection)
+    );
+    return $response;
+    $tpc_dbs_connection->close();
+  } else {
+    if (mysqli_num_rows($result) > 0) {
+      $data = array();
+      while ($row = mysqli_fetch_assoc($result)) {
+        $data[] = $row;
+        $response = array(
+          'success' => true,
+          'data' => $data
+        );
+      }
+      return $response;
+      $tpc_dbs_connection->close();
+    } else {
+      $data[] = 0;
+      $response = array(
+        'success' => false,
+        'data' => $data,
+        'message' => 'No data found!'
+      );
+      return $response;
+      $tpc_dbs_connection->close();
+    }
+  }
+}
+
+// function handleUploadFile($postData)
+// {
+//   error_reporting(1);
+
+//   $operator_id = $postData['operator_id'];
+//   $file_name = $postData['file_name'];
+//   $SubPid = $postData['SubPid'];
+//   $file = $postData['file'];
+//   $remarks = $postData['remarks'];
+//   $source_file = basename($file);
+//   $target_dir = "//172.16.2.13/htdocs/TPC-endpoint/uploads/";
+//   $target_file = $target_dir . basename($file);
+
+//   if (move_uploaded_file($source_file, $target_file)) {
+//     $response = array(
+//       'success' => true,
+//       'target_file' => $target_file,
+//       'message' => "The file " . htmlspecialchars(basename($file)) . " has been copied to the directory."
+//     );
+//     return $response;
+//   } else {
+//     $response = array(
+//       'success' => false,
+//       'file' => $target_file,
+//       'message' => "Sorry, there was an error copying the file."
+//     );
+//     return $response;
+//   }
+//   // if (($_FILES['my_file']['name'] != "")) {
+//   //   // $target_dir = "//172.16.2.61/Data/4haloween/";
+//   //   $target_dir = "//172.16.2.13/htdocs/TPC-endpoint/uploads/";
+//   //   $file = $_FILES['my_file']['name'];
+//   //   $path = pathinfo($file);
+//   //   $filename = $path['filename'];
+//   //   $ext = $path['extension'];
+//   //   $temp_name = $_FILES['my_file']['tmp_name'];
+//   //   $path_filename_ext = $target_dir . $filename . "." . $ext;
+
+//   //   // Check if file already exists
+//   //   if (file_exists($path_filename_ext)) {
+//   //     echo "Sorry, file already exists .." . $path_filename_ext;
+//   //   } else {
+//   //     if (move_uploaded_file($temp_name, $path_filename_ext)) {
+//   //       echo "Congratulations! File Uploaded Successfully." . $path_filename_ext;
+//   //     } else {
+//   //       echo "Unable to upload file." . $path_filename_ext;
+//   //     }
+//   //   }
+//   // }
+// }
+
+function handleGetHeader($postData)
+{
+  require '../config/config.php';
+  require '../config/conn.php';
+  $conn = mysqli_connect($development['server'], $development['username'], $development['password'], $tpc_dbs);
+  $assignment_id = $postData['assignment_id'];
+  $section = $postData['section'];
+
+  if (!$conn) {
+    $response = array(
+      'success' => false,
+      'message' => 'An error occured while connecting to the server, please contact IT/SD for more information.'
+    );
+    return $response;
+  } else {
+    $sql = "SELECT * FROM `ccp_" . $section . "_input_main` WHERE `assignment_id` = '$assignment_id'";
+    $res = mysqli_query($conn, $sql);
+    if (!$res) {
+      $response = array(
+        'success' => false,
+        'message' => 'Unable to fetch data from [' . $section . '], error => ' . mysqli_error($conn)
+      );
+      return $response;
+      $conn->close();
+    } else {
+      if (mysqli_num_rows($res) > 0) {
+        $data = array();
+        while ($row = mysqli_fetch_assoc($res)) {
+          $data[] = $row;
+          $response = array(
+            'success' => true,
+            'data' => $data
+          );
+        }
+        return $response;
+        $conn->close();
+      }
+    }
+  }
+}
+
+function handleGetBatch($postData)
+{
+  require '../config/config.php';
+  require '../config/conn.php';
+  $conn = mysqli_connect($development['server'], $development['username'], $development['password'], $tpc_dbs);
+  $SubPid = $postData['SubPid'];
+  $batch_number = $postData['batch_number'];
+  if (!$conn) {
+    $response = array(
+      'success' => false,
+      'message' => 'An error occured while connecting to the server, please contact IT/SD for more information.'
+    );
+    return $response;
+  } else {
+    $sql = "SELECT assignment_id FROM `batch_process_operator_tbl` WHERE `SubPid` = '$SubPid' AND `batch_number` = '$batch_number'";
+    $res = mysqli_query($conn, $sql);
+    if (!$res) {
+      $response = array(
+        'success' => false,
+        'message' => 'Unable to fetch data from [batch_process_operator_tbl] => Func (handleGetBatch). Error => ' . mysqli_error($conn)
+      );
+      return $response;
+      $conn->close();
+    } else {
+      if (mysqli_num_rows($res) > 0) {
+        $data = array();
+        while ($row = mysqli_fetch_assoc($res)) {
+          $data[] = $row;
+          $response = array(
+            'success' => true,
+            'data' => $data
+          );
+        }
+        return $response;
+        $conn->close();
+      } else {
+        $response = array(
+          'success' => false,
+          'message' => 'No data found using the current parameters being passed! ' . $SubPid . '&' . $batch_number
+        );
+        return $response;
+        $conn->close();
+      }
+    }
+  }
+}
+
+function handleGetBatchProcess($postData)
+{
+  require '../config/config.php';
+  require '../config/conn.php';
+  $conn = mysqli_connect($development['server'], $development['username'], $development['password'], $tpc_prod_dbs);
+  $SubPid = $postData['SubPid'];
+  $assignment_id = $postData['assignment_id'];
+  if (!$conn) {
+    $response = array(
+      'success' => false,
+      'message' => 'An error occured while connecting to the server, please contact IT/SD for more information.'
+    );
+    return $response;
+  } else {
+    $sql = "SELECT * FROM `tpc_main_tbl` WHERE `assignment_id` = '$assignment_id' AND `SubPid` = '$SubPid'";
+    $res = mysqli_query($conn, $sql);
+    if (!$res) {
+      $response = array(
+        'success' => false,
+        'message' => 'Unable to fetch data from [tpc_main_tbl] func(handleGetBatchProcess). query => $sql. Error => ' . mysqli_error($conn)
+      );
+      return $response;
+      $conn->close();
+    } else {
+      if (mysqli_num_rows($res) > 0) {
+        $data = array();
+        while ($row = mysqli_fetch_assoc($res)) {
+          $data[] = $row;
+          $update = "UPDATE `tpc_main_tbl` SET `tpc_sub_status` = 'Done' WHERE `assignment_id` = '{$row['assignment_id']}' AND `SubPid` = '{$row['SubPid']}'";
+          $result = mysqli_query($conn, $update);
+          if (!$result) {
+            $response = array(
+              'success' => false,
+              'message' => 'Unable to fetch data from [tpc_main_tbl] func(handleGetBatchProcess). query => $update Error => ' . mysqli_error($conn)
+            );
+            return $response;
+            $conn->close();
+          } else {
+            $select = "SELECT * FROM `tpc_main_tbl` WHERE `assignment_id` = '{$row['assignment_id']}' AND `sequence_number` > '{$row['sequence_number']}' AND `status` = 'Active' ORDER BY `sequence_number` ASC LIMIT 1";
+            $res2 = mysqli_query($conn, $select);
+            if (!$res2) {
+              $response = array(
+                'success' => false,
+                'message' => 'Unable to fetch data from [tpc_main_tbl] func(handleGetBachProcess), query => $select. Error :' . mysqli_error($conn)
+              );
+              return $response;
+            } else {
+              if (mysqli_num_rows($res2) > 0) {
+                while ($row2 = mysqli_fetch_assoc($res2)) {
+                  $status = $row2['tpc_sub_status'];
+                  if ($status == 'Open') {
+                    $response = array(
+                      'success' => true,
+                      'message' => 'Sub-Process is already Open!'
+                    );
+                    return $response;
+                  } else if ($status == 'Done') {
+                    $response = array(
+                      'success' => true,
+                      'message' => 'Sub-Process is already Done!'
+                    );
+                    return $response;
+                  } else {
+                    $exec = "UPDATE `tpc_main_tbl` SET `tpc_sub_status` = 'Open' WHERE `assignment_id` = '{$row['assignment_id']}' AND `sequence_number` > '{$row['sequence_number']}' AND `status` = 'Active' ORDER BY `sequence_number` ASC LIMIT 1";
+                    $exec_res = mysqli_query($conn, $exec);
+                    if (!$exec_res) {
+                      $response = array(
+                        'success' => false,
+                        'message' => 'Unable to fetch data from [tpc_main_tbl] func(handleGetBatchProcess). Error => ' . mysqli_error($conn)
+                      );
+                      return $response;
+                      $conn->close();
+                    } else {
+                      $response = array(
+                        'success' => true,
+                        'data' => $data,
+                        'message' => 'Sub-Process is already opened!'
+                      );
+                      return $response;
+                      $conn->close();
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      } else {
+        $response = array(
+          'success' => false,
+          'message' => 'No data found using the current parameters SubPid' . $SubPid . ' & assignment_id ' . $assignment_id
+        );
+        return $response;
+        $conn->close();
+      }
+    }
+  }
+}
+
+function handleGetConditions($postData)
+{
+  require '../config/config.php';
+  require '../config/conn.php';
+  $conn = mysqli_connect($development['server'], $development['username'], $development['password'], $tpc_dbs);
+  $conn2 = mysqli_connect($development['server'], $development['username'], $development['password'], $tpc_prod_dbs);
+  $assignment_id = $postData['assignment_id'];
+  $SubPid = $postData['SubPid'];
+  if (!$conn && !$conn2) {
+    $response = array(
+      'success' => false,
+      'message' => 'An error occured while connecting to the server, please contact IT/SD for more information. Error => '
+    );
+    return $response;
+  } else {
+    $sql = "SELECT t1.assignment_id, t1.SubPid, t1.tpc_sub_status, t2.SubPname FROM `tpc_main_tbl` t1 INNER JOIN tpc_dbs.`setup_sub_process_tbl` t2 ON t1.SubPid = t2.SubPid WHERE t1.assignment_id = '$assignment_id' AND t1.tpc_sub_status = 'Done'";
+    $res = mysqli_query($conn2, $sql);
+    if (!$res) {
+      $response = array(
+        'success' => false,
+        'message' => 'Unable to fetch data [handleGetConditions] func($sql). Error => ' . mysqli_error($conn2)
+      );
+      return $response;
+      $conn2->close();
+    } else {
+      if (mysqli_num_rows($res) > 0) {
+        $data = array();
+        while ($row = mysqli_fetch_assoc($res)) {
+          $data[] = $row;
+          $response = array(
+            'success' => true,
+            'data' => $data
+          );
+        }
+        return $response;
+        $conn2->close();
+      }
+    }
+  }
+}
+
+function handleGetOtherConditions($postData)
+{
+  require '../config/config.php';
+  require '../config/conn.php';
+  $conn = mysqli_connect($development['server'], $development['username'], $development['password'], $tpc_prod_dbs);
+  $assignment_id = $postData['assignment_id'];
+  $SubPid = $postData['SubPid'];
+  $operator_number = $postData['operator_number'];
+  if (!$conn) {
+    $response = array(
+      'success' => false,
+      'message' => 'An error occured while connecting to the server, please contact IT/SD for more information. Error => '
+    );
+    return $response;
+  } else {
+    $sql = "SELECT * FROM `tpc_condition_tbl` WHERE `assignment_id` = '$assignment_id' AND `SubPid` = '$SubPid' AND `operator_number` = '$operator_number' ORDER BY `tpc_condition_tbl`.`sequence_number` ASC";
+    $res = mysqli_query($conn, $sql);
+    if (!$res) {
+      $response = array(
+        'success' => false,
+        'message' => 'Unable to fetch data [handleGetOtherConditions] func($sql). Error => ' . mysqli_error($conn)
+      );
+      return $response;
+      $conn->close();
+    } else {
+      if (mysqli_num_rows($res) > 0) {
+        $data = array();
+        while ($row = mysqli_fetch_assoc($res)) {
+          $data[] = $row;
+          $response = array(
+            'success' => true,
+            'data' => $data
+          );
+        }
+        return $response;
+        $conn->close();
+      }
+    }
+  }
+}
+
+function handleGetOperators($postData)
+{
+  require '../config/config.php';
+  require '../config/conn.php';
+  $conn = mysqli_connect($development['server'], $development['username'], $development['password'], $tpc_dbs);
+  $SubPid = $postData['SubPid'];
+  $assignment_id = $postData['assignment_id'];
+  if (!$conn) {
+    $response = array(
+      'success' => false,
+      'message' => 'An error occured while connecting to the server, please contact IT/SD for more information.'
+    );
+    return $response;
+  } else {
+    $sql = "SELECT operator_number FROM `batch_process_operator_tbl` WHERE `SubPid` = '$SubPid' AND `assignment_id` = '$assignment_id'";
+    $res = mysqli_query($conn, $sql);
+    if (!$res) {
+      $response = array(
+        'success' => false,
+        'message' => 'Unable to fech data [handleGetConditions] func($sql). Error => ' . mysqli_error($conn)
+      );
+      return $response;
+      $conn->close();
+    } else {
+      if (mysqli_num_rows($res) > 0) {
+        while ($row = mysqli_fetch_assoc($res)) {
+          $response = array(
+            'success' => true,
+            'operator_number' => $row['operator_number']
+          );
+        }
+        return $response;
+        $conn2->close();
+      }
+    }
+  }
+}
+
+
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   if (isset($_POST['btn_process'])) {
     $postData = $_POST;
@@ -502,6 +921,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   } else if (isset($_POST['updateRemarks'])) {
     $postData = $_POST;
     $responseData = handleUpdateRemarks($postData);
+    header('Content-Type: application/json');
+    echo json_encode($responseData);
+  } else if (isset($_POST['getSubProcess'])) {
+    $postData = $_POST;
+    $responseData = handleGetSubProcess($postData);
+    header('Content-Type: application/json');
+    echo json_encode($responseData);
+  }
+  // else if (isset($_POST['upload'])) {
+  //   $postData = $_POST;
+  //   $responseData = handleUploadFile($postData);
+  //   header('Content-Type: application/json');
+  //   echo json_encode($responseData);
+  // }
+  else if (isset($_POST['getHeader'])) {
+    $postData = $_POST;
+    $responseData = handleGetHeader($postData);
+    header('Content-Type: application/json');
+    echo json_encode($responseData);
+  } else if (isset($_POST['get_batched'])) {
+    $postData = $_POST;
+    $responseData = handleGetBatch($postData);
+    header('Content-Type: application/json');
+    echo json_encode($responseData);
+  } else if (isset($_POST['get_batched_process'])) {
+    $postData = $_POST;
+    $responseData = handleGetBatchProcess($postData);
+    header('Content-Type: application/json');
+    echo json_encode($responseData);
+  } else if (isset($_POST['get_conditions'])) {
+    $postData = $_POST;
+    $responseData = handleGetConditions($postData);
+    header('Content-Type: application/json');
+    echo json_encode($responseData);
+  } else if (isset($_POST['get_other_conditions'])) {
+    $postData = $_POST;
+    $responseData = handleGetOtherConditions($postData);
+    header('Content-Type: application/json');
+    echo json_encode($responseData);
+  } else if (isset($_POST['get_operators'])) {
+    $postData = $_POST;
+    $responseData = handleGetOperators($postData);
     header('Content-Type: application/json');
     echo json_encode($responseData);
   }

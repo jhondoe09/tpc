@@ -1,10 +1,9 @@
 // FOR DEBUGGING
-// const fetchURL1 = 'https://172.16.2.61/tpc_ver2/backend/query/queries.php';
-// const fetchURL2 = 'https://172.16.2.61/tpc_ver2/backend/endpoint/endpoint.php';
+const fetchURL1 = 'https://172.16.2.61/tpc_ver2/backend/query/queries.php';
+const fetchURL2 = 'https://172.16.2.61/tpc_ver2/backend/endpoint/endpoint.php';
 // FOR DEPLOYMENT
-const fetchURL1 = 'https://172.16.2.13/tpc_ver2/backend/query/queries.php';
-const fetchURL2 = 'https://172.16.2.13/tpc_ver2/backend/endpoint/endpoint.php';
-
+// const fetchURL1 = 'https://172.16.2.13/tpc_ver2/backend/query/queries.php';
+// const fetchURL2 = 'https://172.16.2.13/tpc_ver2/backend/endpoint/endpoint.php';
 
 const urlParams = new URLSearchParams(window.location.search);
 const assign_id = urlParams.get('assignment_id');
@@ -72,12 +71,13 @@ qrSubmitBtn.addEventListener('click', (event) => {
         })
         .catch(error => {
             var p = document.getElementById('errorP');
-            p.textContent = 'Our database search did not yield any results that match the QR code provided. Please try again thank you!';
+            p.textContent = `An error occured while fetching data =>! ${error}`;
             div.classList.remove("hidden");
             console.error(error);
         }
         );
 });
+
 function getSection() {
     var select = document.getElementById('sectionId');
     fetch(fetchURL2)
@@ -92,4 +92,5 @@ function getSection() {
             console.error(error);
         });
 }
+
 getSection();

@@ -15,14 +15,14 @@
   margin-left: 320px;
 }
 
-@media screen and (max-width: 1280px) {
+/* @media screen and (max-width: 1280px) {
   .sidebar {
       display: none;
   }
   #main_content {
-    transition: margin-left .5s; /* If you want a transition effect */
+    transition: margin-left .5s;
     padding: 20px;
     margin-left: 20px;
   }
   
-}
+} */
