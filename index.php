@@ -7,6 +7,7 @@
     <meta http-equiv='cache-control' content='no-cache'>
     <meta http-equiv='expires' content='0'>
     <meta http-equiv='pragma' content='no-cache'>
+    <link rel="icon" href="frontend/images/atom_tpc.png">
     <title>TPC</title>
     <!-- <script src="https://cdn.tailwindcss.com"></script> -->
     <?php include 'frontend/layouts/links.php' ?>

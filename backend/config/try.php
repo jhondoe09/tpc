@@ -1,6 +1,4 @@
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', 0);
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
@@ -17,6 +15,7 @@ function getCurrentTimestamp() {
 //     'password' => '',
 //     'tpc_dbs' => 'tpc_dbs'
 //   );
+
 // Deploy
 $connection = array(
   'server' => '172.16.2.16',
@@ -24,6 +23,7 @@ $connection = array(
   'password' => 'cmisd032018',
   'tpc_dbs' => 'tpc_dbs'
 );
+
 function createConnection($getData, $conn){
   $main_conn = mysqli_connect($conn['server'], $conn['username'], $conn['password'], $conn['tpc_dbs']);
   if(!$main_conn){
