@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Drive API Quickstart</title>
+    <meta charset="utf-8" />
+  </head>
+  <body>
+    <p>Drive API Quickstart</p>
+
+    <!-- Add buttons to initiate auth sequence and sign out -->
+    <button id="authorize_button" onclick="handleAuthClick()">Authorize</button>
+    <button id="signout_button" onclick="handleSignoutClick()">Sign Out</button>
+    <input type="file" id="file_input">
+    <pre id="content" style="white-space: pre-wrap;"></pre>
+
+    <script type="text/javascript">
+      /* exported gapiLoaded */
+      /* exported gisLoaded */
+      /* exported handleAuthClick */
+      /* exported handleSignoutClick */
+
+      const CLIENT_ID = '619515517272-fb6m4ucg8el3kt6cmq7roobinusf4a9q.apps.googleusercontent.com';
+      const API_KEY = 'AIzaSyAFm5UIc00Xaar09plB37gxnRJHvUmfIH0';
+      const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest';
+      const SCOPES = 'https://www.googleapis.com/auth/drive.file';
+
+      let tokenClient;
+      let gapiInited = false;
+      let gisInited = false;
+
+      document.getElementById('authorize_button').style.visibility = 'hidden';
+      document.getElementById('signout_button').style.visibility = 'hidden';
+
+      function gapiLoaded() {
+        gapi.load('client', initializeGapiClient);
+      }
+
+      async function initializeGapiClient() {
+        await gapi.client.init({
+          apiKey: API_KEY,
+          discoveryDocs: [DISCOVERY_DOC],
+        });
+        gapiInited = true;
+        maybeEnableButtons();
+      }
+
+      function gisLoaded() {
+        tokenClient = google.accounts.oauth2.initTokenClient({
+          client_id: CLIENT_ID,
+          scope: SCOPES,
+          callback: '', // defined later
+        });
+        gisInited = true;
+        maybeEnableButtons();
+      }
+
+      function maybeEnableButtons() {
+        if (gapiInited && gisInited) {
+          document.getElementById('authorize_button').style.visibility = 'visible';
+        }
+      }
+
+      function handleAuthClick() {
+        tokenClient.callback = async (resp) => {
+          if (resp.error !== undefined) {
+            throw (resp);
+          }
+          document.getElementById('signout_button').style.visibility = 'visible';
+          document.getElementById('authorize_button').innerText = 'Refresh';
+          await listFiles();
+        };
+
+        if (gapi.client.getToken() === null) {
+          tokenClient.requestAccessToken({ prompt: 'consent' });
+        } else {
+          tokenClient.requestAccessToken({ prompt: '' });
+        }
+      }
+
+      function handleSignoutClick() {
+        const token = gapi.client.getToken();
+        if (token !== null) {
+          google.accounts.oauth2.revoke(token.access_token);
+          gapi.client.setToken('');
+          document.getElementById('content').innerText = '';
+          document.getElementById('authorize_button').innerText = 'Authorize';
+          document.getElementById('signout_button').style.visibility = 'hidden';
+        }
+      }
+
+      async function listFiles() {
+        let response;
+        try {
+          response = await gapi.client.drive.files.list({
+            'pageSize': 10,
+            'fields': 'files(id, name)',
+          });
+        } catch (err) {
+          document.getElementById('content').innerText = err.message;
+          return;
+        }
+        const files = response.result.files;
+        if (!files || files.length == 0) {
+          document.getElementById('content').innerText = 'No files found.';
+          return;
+        }
+        const output = files.reduce(
+          (str, file) => `${str}${file.name} (${file.id})\n`,
+          'Files:\n');
+        document.getElementById('content').innerText = output;
+      }
+
+      function handleFileSelect(event) {
+        const file = event.target.files[0];
+        if (file) {
+          uploadFile(file);
+        }
+      }
+
+      function uploadFile(file) {
+        const folderId = '1gR55aWeGLYdZY9QMbIHd1-lDJlVWS_FE'; 
+        const metadata = {
+          'name': file.name,
+          'mimeType': file.type,
+          'parents': [folderId]
+        };
+
+        const accessToken = gapi.client.getToken().access_token;
+        console.log('Access Token:', accessToken);  // Log the access token for debugging
+
+        const form = new FormData();
+        form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json; charset=UTF-8' }));
+        form.append('file', file);
+
+        // Update this URL to your backend server's endpoint
+        fetch('http://localhost:5000/upload', {
+          method: 'POST',
+          headers: new Headers({
+            'Authorization': 'Bearer ' + accessToken
+          }),
+          body: form
+        }).then((response) => {
+          if (!response.ok) {
+            return response.json().then(err => { throw err; });
+          }
+          return response.json();
+        }).then((data) => {
+          console.log('File uploaded successfully, File ID:', data.id);
+        }).catch((error) => {
+          console.error('Error uploading file:', error);
+        });
+      }
+
+      document.getElementById('file_input').addEventListener('change', handleFileSelect, false);
+    </script>
+    <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
+    <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
+  </body>
+</html>

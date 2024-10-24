@@ -62,13 +62,15 @@
 </div>
 <script>
   let section = document.getElementById('section').textContent;
-  const getHeaderData = new FormData();
-  getHeaderData.append('assignment_id', localStorage.getItem('assign_id'));
-  getHeaderData.append('section', section);
-  getHeaderData.append('getHeader', 'true');
-  fetch(fetchURL, {
-      method: 'POST',
-      body: getHeaderData
+  const params = {
+    assignment_id: localStorage.getItem('assign_id'),
+    section: section,
+    getHeader: 'true'
+  };
+  const url = new URL(fetchURL);
+  Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
+  fetch(url.toString(), {
+      method: 'GET'
     })
     .then(response => response.json())
     .then(datas => {
@@ -76,6 +78,7 @@
         if (datas.success) {
           for (let data of datas.data) {
             console.log(data);
+            localStorage.setItem('header_data', JSON.stringify(data));
             document.getElementById('lotNo').textContent = data.lot_number;
             document.getElementById('partsNumber').textContent = data.item_parts_number;
             document.getElementById('kValue').textContent = data.k_value;
@@ -85,7 +88,10 @@
             document.getElementById('thickness').textContent = data.thickness;
             document.getElementById('seedCrystalData').textContent = data.seed_crystal_lot_number;
             document.getElementById('mainMatData').textContent = data.main_material_lot_number;
-            document.getElementById('quantity').textContent = data.quantity ? parseFloat(data.quantity).toLocaleString('en-US', {
+            document.getElementById('quantity').textContent = data.qty ? parseFloat(data.qty).toLocaleString('en-US', {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2
+            }) : data.quantity ? parseFloat(data.quantity).toLocaleString('en-US', {
               minimumFractionDigits: 2,
               maximumFractionDigits: 2
             }) : "-";

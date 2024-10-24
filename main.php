@@ -5,58 +5,52 @@
     <meta charset="UTF-8">
     <!-- <meta http-equiv="X-UA-Compatible" content="IE=edge"> -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests" /> -->
     <link rel="stylesheet" href="./frontend/css/placeholder.css">
     <title>TPC</title>
     <?php include 'frontend/layouts/links.php' ?>
     <script>
-        $(function() {
+        $(window).on("load", function() {
+
             function likeMatch(pattern, subject) {
                 pattern = pattern.replace(/%/g, '.*');
                 const regex = new RegExp(`^${pattern}$`, 'i');
                 return regex.test(subject);
             }
             let sectionId2 = $("#section").text();
-            // console.log(sectionId);
-            // let section_description = localStorage.getItem('sectionDescription');
-            // let lot_number = localStorage.getItem('lotNo');
-            // let parts_number = localStorage.getItem('partsNumber');
-            // let revision_number = localStorage.getItem('revisionNumber');
-            // let assignment_id = localStorage.getItem('assign_id');
-            // let item_code = localStorage.getItem('itemCode');
-            // let sampling = localStorage.getItem('sampling');
-            // let uncontrolled = localStorage.getItem('uncontrolled');
-            // let status = localStorage.getItem('status');
-            // let SubPid = localStorage.getItem('subPid');
-            // let section_id = localStorage.getItem('sectionId');
-            // let date_issued = localStorage.getItem('dateIssued');
-            if (likeMatch('%CWP%', sectionId2) || likeMatch('%POL%', sectionId2)) {
-                $("#includedContent").load("frontend/headers/cwp.php");
-                localStorage.setItem('loaded', 'true');
-                console.log(`CWP ${sectionId2} || POL ${sectionId2}`);
-            } else if (likeMatch('%SWP%', sectionId2)) {
-                $("#includedContent").load("frontend/headers/swp.php");
-                localStorage.setItem('loaded', 'true');
-                console.log(`SWP ${sectionId2}`);
-            } else if (likeMatch('%CCI%', sectionId2)) {
-                $("#includedContent").load("frontend/headers/cci.php");
-                localStorage.setItem('loaded', 'true');
-                console.log(`CCI ${sectionId2}`);
-            } else if (likeMatch('%CCD%', sectionId2)) {
-                $("#includedContent").load("frontend/headers/ccd.php");
-                localStorage.setItem('loaded', 'true');
-                console.log(`CCD ${sectionId2}`);
-            } else {
-                $("#includedContent").load("frontend/headers/cwp.php");
-                localStorage.setItem('loaded', 'false');
-                console.log(`ELSE ${sectionId2}`);
+            if (sectionId2) {
+                setTimeout(tiemOut,
+                    1000);
+            }
+
+            function tiemOut() {
+                if (likeMatch('%CWP%', sectionId2) || likeMatch('%POL%', sectionId2) || likeMatch('%LWP%', sectionId2)) {
+                    $("#includedContent").load("frontend/headers/cwp.php");
+                    localStorage.setItem('loaded', 'true');
+                    console.log(`CWP ${sectionId2} || POL ${sectionId2}|| LWP ${sectionId2}`);
+                } else if (likeMatch('%SWP%', sectionId2)) {
+                    $("#includedContent").load("frontend/headers/swp.php");
+                    localStorage.setItem('loaded', 'true');
+                    console.log(`SWP ${sectionId2}`);
+                } else if (likeMatch('%CCI%', sectionId2)) {
+                    $("#includedContent").load("frontend/headers/cci.php");
+                    localStorage.setItem('loaded', 'true');
+                    console.log(`CCI ${sectionId2}`);
+                } else if (likeMatch('%CCD%', sectionId2)) {
+                    $("#includedContent").load("frontend/headers/ccd.php");
+                    localStorage.setItem('loaded', 'true');
+                    console.log(`CCD ${sectionId2}`);
+                }
             }
         });
     </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@2.0.943/build/pdf.min.js"></script>
 </head>
 
 <!-- <body id="main" class="bg-gradient-to-r from-cyan-200 to-blue-400" style="font-family: 'Roboto Condensed', sans-serif;"> -->
 
-<body class="col-md-12" id="main" style="background-color: #a5f3fc; font-family: 'Roboto Condensed', sans-serif;">
+<body id="main" style="background-color: #a5f3fc; font-family: 'Roboto Condensed', sans-serif;">
     <div class="px-2 py-3 mh-100 sidebar shadow-md" id="sidebar" style="background-color: #22d3ee;">
         <?php include './frontend/includes/sideBar.php'; ?>
     </div>
@@ -124,16 +118,13 @@
                                         <div class="col">
                                             <span class="badge rounded-pill" id="result_type"></span>
                                         </div>
+                                        <div class="col">
+                                            <p class="fw-bold">Reference:</p>
+                                        </div>
+                                        <div class="col">
+                                            <span class="material-symbols-outlined align-bottom" onclick="addCondition()">quick_reference</span>
+                                        </div>
                                     </div>
-                                    <!-- <div class="col-md-4">
-                                            <p id="subProcessStatus">Status: </p>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <p id="sampling">Sampling: Yes </p>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <p>Uncontrolled Quantity: Yes</p>
-                                        </div> -->
                                 </div>
                                 <div class="col-md-6 container">
                                     <ul class="navbar-nav ms-auto mb-2 mb-lg-0 row row-cols-2">
@@ -156,21 +147,21 @@
                             </div>
                         </nav>
                     </div>
-                    <hr>
+                    <hr class="d-none" id="attachment_hr">
                     <div class="attachment-container" id="attachContainer" style="overflow: auto;" width="200%" height="500px">
 
                     </div>
                     <!-- MODAL -->
                     <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+                        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-fullscreen">
                             <div class="modal-content">
                                 <div class="modal-header">
                                     <h1 class="modal-title fs-5" id="modalTitle">File Viewer</h1>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="closeAttachmentModal"></button>
                                 </div>
                                 <div class="modal-body">
-                                    <div id="content">
-                                        <iframe id="fileViewer" src="" width="100%" height="500px"></iframe>
+                                    <div id="content" width="100%" height="100%">
+                                        <iframe id="fileViewer" src="" width="100%" height="100%" frameborder='0'></iframe>
                                     </div>
                                 </div>
                                 <div class="modal-footer">
@@ -236,7 +227,12 @@
                         </div>
                     </div>
                     <!-- END OF CONDITION TABLE -->
-                    <hr>
+                    <hr class="d-none" id="reference_hr">
+                    <!-- REFETCH -->
+                    <div class="floating-button-div">
+                        <button class="btn btn-sm btn-primary rounded-5 d-none" id="refetch_button"><span class="material-symbols-outlined">source_notes</span></button>
+                    </div>
+                    <!-- END OF REFETCH -->
                     <p class="lead d-none" id="reference_p">Reference</p>
                     <!--  START OF REFERENCE TABLE -->
                     <div class="tab-pane fade show active d-none" id="nav_condition" role="tabpanel" aria-labelledby="nav-home-tab" tabindex="0">
@@ -271,24 +267,27 @@
             </div>
         </div>
     </div>
-    <div class="fixed-bottom text-center shadow-lg" style="background-color: #7dd3fc;">COPYRIGHT © TECDIA-SD 2023</div>
+    <div class="fixed-bottom text-center shadow-lg" style="background-color: #7dd3fc;">MADE WITH ♥ © TECDIA-SD 2023</div>
+    <script src="./config/config.js"></script>
+    <script>
+        contentType("main");
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe" crossorigin="anonymous"></script>
+    <script src="frontend/assets/bootstrap-5.3.1-dist/js/jquery.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+
+    <!-- <script id="jsTag" src="./frontend/js/main.js"></script> -->
+    <script src="./frontend/js/images.js"></script>
+    <!-- <script src="./frontend/js/dataTable.js"></script> -->
+    <script src="./frontend/js/navbar.js"></script>
+    <script src="./frontend/js/modal.js"></script>
+    <script src="./frontend/js/exit.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js"></script>
+    <!-- <script src="./frontend/js/office.js"></script> -->
+    <!-- <script src="https://ajax.aspnetcdn.com/ajax/microsoft.ajax.js"></script> -->
 </body>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe" crossorigin="anonymous"></script>
-
-<script src="frontend/assets/bootstrap-5.3.1-dist/js/jquery.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
-
-<script id="jsTag" src="./frontend/js/main.js"></script>
-<script src="./frontend/js/images.js"></script>
-<!-- <script src="./frontend/js/dataTable.js"></script> -->
-<script src="./frontend/js/navbar.js"></script>
-<script src="./frontend/js/modal.js"></script>
-<script src="./frontend/js/exit.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-<script src="./frontend/js/office.js"></script>
-<script src="https://ajax.aspnetcdn.com/ajax/microsoft.ajax.js"></script>
 
 <!-- Scan Operator ID MODAL -->
 <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
@@ -385,25 +384,19 @@
                 <div class="container col-md-12">
                     <div class="col-md-12 row">
                         <div class="col-md-5">
-                            <label for="" class="col-md-5 col-form-label col-form-label-md">Select Sub-Process</label>
+                            <label for="" class="col-md-5 col-form-label col-form-label-md" for="add_condition_select">Select Sub-Process</label>
                             <select class="form-select col-md-7 col-form-select-md" aria-label="Default select example" id="add_condition_select">
                                 <option selected>Open this select menu</option>
-                                <option value="1">One</option>
-                                <option value="2">Two</option>
-                                <option value="3">Three</option>
                             </select>
                         </div>
                         <div class="col-md-5">
-                            <label for="" class="col-md-5 col-form-label col-form-label-md">Select Operator Number</label>
+                            <label for="" class="col-md-5 col-form-label col-form-label-md" for="operator_select">Select Operator Number</label>
                             <select class="form-select col-md-7 col-form-select-md" aria-label="Default select example" id="operator_select">
                                 <option selected>Open this select menu</option>
-                                <option value="1">One</option>
-                                <option value="2">Two</option>
-                                <option value="3">Three</option>
                             </select>
                         </div>
                         <div class="col-md-2">
-                            <label for="" class="col-md-4 col-form-label col-form-label-md">Submit</label>
+                            <label for="" class="col-md-4 col-form-label col-form-label-md" for="submit_add_condition">Submit</label>
                             <button type="button" class="btn btn-outline-secondary btn-sm col-md-8" id="submit_add_condition"><span class="material-symbols-outlined">check_circle</span></button>
                         </div>
                     </div>

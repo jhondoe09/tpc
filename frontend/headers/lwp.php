@@ -23,13 +23,15 @@
 
 <script>
     let section = document.getElementById('section').textContent;
-    const getHeaderData = new FormData();
-    getHeaderData.append('assignment_id', localStorage.getItem('assign_id'));
-    getHeaderData.append('section', section);
-    getHeaderData.append('getHeader', 'true');
-    fetch(fetchURL, {
-            method: 'POST',
-            body: getHeaderData
+    const params = {
+        assignment_id: localStorage.getItem('assign_id'),
+        section: section,
+        getHeader: 'true'
+    };
+    const url = new URL(fetchURL);
+    Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
+    fetch(url.toString(), {
+            method: 'GET'
         })
         .then(response => response.json())
         .then(datas => {
@@ -37,6 +39,7 @@
                 if (datas.success) {
                     for (let data of datas.data) {
                         console.log(data);
+                        localStorage.setItem('header_data', JSON.stringify(data));
                         document.getElementById('surface').textContent = data.surface;
                         document.getElementById('k_value').textContent = data.k_value;
                         document.getElementById('thickness').textContent = data.thickness;

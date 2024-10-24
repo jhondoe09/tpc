@@ -6,22 +6,25 @@ function likeMatch(pattern, subject) {
     return regex.test(subject);
 }
 
-if (likeMatch('%CWP%', sectionId) || likeMatch('%POL%', sectionId)) 
-{
+if (likeMatch('%CWP%', sectionId) || likeMatch('%POL%', sectionId)) {
     var scriptSrc = './frontend/js/cwp.js';
     var scriptElement = document.createElement('script');
     scriptElement.setAttribute('src', scriptSrc);
     document.head.appendChild(scriptElement);
 }
-else if(likeMatch('%SWP%', sectionId)) 
-{
-    var scriptSrc = './frontend/js/swp.js';
-    var scriptElement = document.createElement('script');
-    scriptElement.setAttribute('src', scriptSrc);
-    document.head.appendChild(scriptElement);
-}
-else
-{
+// else if (likeMatch('%SWP%', sectionId)) {
+//     var scriptSrc = './frontend/js/swp.js';
+//     var scriptElement = document.createElement('script');
+//     scriptElement.setAttribute('src', scriptSrc);
+//     document.head.appendChild(scriptElement);
+// }
+// else if (likeMatch('%CCD%', sectionId)) {
+//     var scriptSrc = './frontend/js/ccd.js';
+//     var scriptElement = document.createElement('script');
+//     scriptElement.setAttribute('src', scriptSrc);
+//     document.head.appendChild(scriptElement);
+// }
+else {
     var scriptSrc = './frontend/js/cwp.js';
     var scriptElement = document.createElement('script');
     scriptElement.setAttribute('src', scriptSrc);
