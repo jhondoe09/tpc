@@ -198,6 +198,11 @@
                                     if (datas.success) {
                                         const t_header = document.getElementById('t_head');
                                         const tbody_2 = document.getElementById('tbody_2');
+                                        let headers = '';
+                                        let tbody2_th_1 = '';
+                                        let tbody2_th_2 = '';
+                                        t_header.innerHTML = '';
+                                        tbody_2.innerHTML = '';
 
                                         for (let i = parseInt(wafer_number_from); i <= parseInt(wafer_number_to); i++) {
                                             headers += `<th scope="col">${i}</th>`;

@@ -2665,6 +2665,7 @@ if (maintenance) {
                                     const file = b.getAttribute('data-bs-Ic_attachment');
                                     loading_content.classList.remove('d-none');
                                     const get_file = new FormData();
+                                    console.log(file);
                                     get_file.append('path', file);
                                     get_file.append('view_ic_button', 'true');
                                     fetch(fetchIC, {
@@ -2681,6 +2682,7 @@ if (maintenance) {
                                                     window.location.href = `https://172.16.2.13/TPC_VER2/New folder/index2.php?PATH=${datas.path}`;
                                                     // window.location.href = `https://172.16.2.13/TPC_VER2/New folder/index2.php?PATH=${datas.path}`;
                                                 } else {
+                                                    second_modal_btn.click();
                                                     showToast(datas.message, 'frontend/images/file_off.png');
                                                 }
                                             }

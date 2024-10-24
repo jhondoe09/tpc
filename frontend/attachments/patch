@@ -1,3 +1,5 @@
+10/17/2024
+:-Implemented RF measurement, IOT fetching, automation of wafer number(RI Process') and SWP Section Headers
 02/08/2024
 :-Implemented additional validation protocols pertaining to the status of sub processes,
 \*including but not limited to the states of {"Open," "To Be Determined (TBD)," and "Done"}

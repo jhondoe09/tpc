@@ -6,6 +6,7 @@
     <!-- <meta http-equiv="X-UA-Compatible" content="IE=edge"> -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests" /> -->
+    <link rel="icon" href="frontend/images/atom_tpc.png">
     <link rel="stylesheet" href="./frontend/css/placeholder.css">
     <title>TPC</title>
     <?php include 'frontend/layouts/links.php' ?>
@@ -27,19 +28,31 @@
                 if (likeMatch('%CWP%', sectionId2) || likeMatch('%POL%', sectionId2) || likeMatch('%LWP%', sectionId2)) {
                     $("#includedContent").load("frontend/headers/cwp.php");
                     localStorage.setItem('loaded', 'true');
-                    console.log(`CWP ${sectionId2} || POL ${sectionId2}|| LWP ${sectionId2}`);
+                        if (debugging_mode) {
+                            console.log(`CWP ${sectionId2} || POL ${sectionId2}|| LWP ${sectionId2}`);
+                        }
+                    
                 } else if (likeMatch('%SWP%', sectionId2)) {
                     $("#includedContent").load("frontend/headers/swp.php");
                     localStorage.setItem('loaded', 'true');
-                    console.log(`SWP ${sectionId2}`);
+                        if (debugging_mode) {
+                            console.log(`SWP ${sectionId2}`);
+                        }
+                   
                 } else if (likeMatch('%CCI%', sectionId2)) {
                     $("#includedContent").load("frontend/headers/cci.php");
                     localStorage.setItem('loaded', 'true');
-                    console.log(`CCI ${sectionId2}`);
+                        if (debugging_mode) {
+                            console.log(`CCI ${sectionId2}`);
+                        }
+                    
                 } else if (likeMatch('%CCD%', sectionId2)) {
                     $("#includedContent").load("frontend/headers/ccd.php");
                     localStorage.setItem('loaded', 'true');
-                    console.log(`CCD ${sectionId2}`);
+                        if (debugging_mode) {
+                            console.log(`CCD ${sectionId2}`);
+                        }
+                   
                 }
             }
         });
