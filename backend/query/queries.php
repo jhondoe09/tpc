@@ -280,7 +280,7 @@ function handleTableClicked($getData)
         return $data;
         $tpc_prod_dbs_connection->close();
       } else {
-        $sql = "SELECT t1.*, t2.*, t3.tpc_sub_remarks, t3.SubPid, t3.assignment_id  FROM form_item_conditions_tbl t1 LEFT JOIN field_main_tbl t2 ON t1.field_type = t2.field_type_description INNER JOIN tpc_prod_dbs.tpc_main_tbl t3 ON t1.assignment_id = t3.assignment_id AND t1.SubPid = t3.SubPid WHERE t1.`SubPid` = '$sub_pid' AND t1.`assignment_id` = '$assign_id' AND t1.`condition_status` = 'Active' ORDER BY t1.`sequence_number` ASC";
+        $sql = "SELECT t1.*, t2.*, t3.tpc_sub_remarks, t3.SubPid, t3.assignment_id, t4.* FROM form_item_conditions_tbl t1 LEFT JOIN field_main_tbl t2 ON t1.field_type = t2.field_type_description INNER JOIN tpc_prod_dbs.tpc_main_tbl t3 ON t1.assignment_id = t3.assignment_id AND t1.SubPid = t3.SubPid LEFT JOIN setup_process_detail_items_tbl t4 ON t1.item_id = t4.item_id WHERE t1.`SubPid` = '$sub_pid' AND t1.`assignment_id` = '$assign_id' AND t1.`condition_status` = 'Active' ORDER BY t1.`sequence_number` ASC";
         // $sql = "SELECT t1.*, t2.*, t3.tpc_sub_remarks, t3.SubPid, t3.assignment_id, t4.SubPid, t4.database_name, t4.table_name, 
         // t4.fieldname_1, t4.fieldname_2, t4.fieldname_3, t4.fetching_eng, t4.new_detail, t4.eng_server, t4.eng_db_username, t4.eng_db_password
         // FROM form_item_conditions_tbl t1 LEFT JOIN field_main_tbl t2 ON t1.field_type = t2.field_type_description 
@@ -680,8 +680,8 @@ function handleGetHeader($getData)
         'success' => false,
         'message' => 'Unable to fetch data from [' . $section . '], error => ' . mysqli_error($conn)
       );
-      return $response;
       $conn->close();
+      return $response;
     } else {
       if (mysqli_num_rows($res) > 0) {
         $data = array();
@@ -692,8 +692,16 @@ function handleGetHeader($getData)
             'data' => $data
           );
         }
-        return $response;
         $conn->close();
+        return $response;
+      }else{
+        $response = array(
+          'success' => false,
+          'message' => 'No data found using the current sql parameters',
+          'sql' => $sql
+        );
+        $conn->close();
+        return $response;
       }
     }
   }
@@ -1887,7 +1895,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $getData = $_GET;
     $responseData = handleGetHeader($getData);
     header('Content-Type: application/json');
-    echo json_encode($responseData);
+    $json = json_encode($responseData);
+    if ($json === false) {
+      // Encoding failed
+      // echo $error_code = json_last_error();
+      // echo $error_msg = json_last_error_msg();
+      $utf8_encoded_data = mb_convert_encoding($responseData, 'UTF-8', 'Windows-1252');
+      // Handle the error
+      echo json_encode($utf8_encoded_data);
+    } else {
+      echo json_encode($responseData);
+    }
   } else if (isset($_GET['get_tan_lot'])) {
     $getData = $_GET;
     $responseData = handleGetTanLot($getData);

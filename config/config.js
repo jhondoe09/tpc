@@ -10,7 +10,7 @@ let mainScript = document.createElement('script');
 indexScript.src = `./frontend/js/index_${version}.js`;
 mainScript.src = `./frontend/js/cwp_${version}.js?version=${version}&cacheBust=${Date.now()}`;
 
-const ip = '195';
+const ip = '196';
 
 // INDEX JS
 function indexProdFunction(production) {

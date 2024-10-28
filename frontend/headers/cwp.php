@@ -85,7 +85,7 @@
             document.getElementById('dateIssue').textContent = data.date_issued;
             document.getElementById('materialLotNo').textContent = data.material_lot_number;
             document.getElementById('waferSize').textContent = data.wafer_size;
-            document.getElementById('thickness').textContent = data.thickness;
+            document.getElementById('thickness').innerHTML = data.thickness;
             document.getElementById('seedCrystalData').textContent = data.seed_crystal_lot_number;
             document.getElementById('mainMatData').textContent = data.main_material_lot_number;
             document.getElementById('quantity').textContent = data.qty ? parseFloat(data.qty).toLocaleString('en-US', {
