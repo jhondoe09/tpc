@@ -3,7 +3,8 @@
 $development = array(
   'server' => '172.16.2.16',
   'username' => 'sdroot',
-  'password' => 'cmisd032018'
+  'password' => 'cmisd032018',
+  'tpc_dbs' => 'tpc_dbs'
 );
 
 // IC SERVER
